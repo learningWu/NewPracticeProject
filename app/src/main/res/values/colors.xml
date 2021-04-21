@@ -7,4 +7,29 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="common_orange_light">#FFCA3C</color>
+    <color name="common_orange_deep">#8B572A</color>
+
+    <color name="accent_orange_ta_transparent_10">#19FF8B19</color>
+    <color name="accent_orange_ta">#FF8B19</color>
+    <color name="resource_bg">#FAFAFA</color>
+    <color name="order_status">#8D5A33</color>
+    <color name="order_orange_pressed">#33ff6600</color>
+    <color name="order_orange_disable">#81ff6600</color>
+    <color name="tip_bg">#fffaf0</color>
+    <color name="red">#FA4124</color>
+
+    <color name="orange_light">#fff3e9</color>
+    <color name="tag_green_light">#e9faf1</color>
+    <color name="green">#51d691</color>
+
+    <color name="text_warning_color">#fc9925</color>
+    <color name="gray_9b9b9b">#9b9b9b</color>
+    <color name="orange_fffff3ed">#fffff3ed</color>
+    <color name="grey_838383">#838383</color>
+    <color name="orange_FFE5D7">#FFE5D7</color>
+    <color name="grey_F0F0F0">#F0F0F0</color>
+    <color name="yellow_B07625">#B07625</color>
+
 </resources>

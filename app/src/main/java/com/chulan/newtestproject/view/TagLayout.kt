@@ -20,6 +20,7 @@ class TagLayout @JvmOverloads constructor(
         var usedHeight = 0
         var lineWidth = 0
         var lineHeight = 0
+        val maxWidth = MeasureSpec.getSize(widthMeasureSpec)
         for (i in 0 until childCount) {
             // 计算宽度
             getChildAt(i).apply {
@@ -29,17 +30,24 @@ class TagLayout @JvmOverloads constructor(
                         0, layoutParams.height)
 
                 this.measure(childWidthMeasureSpec, childHeightMeasureSpec)
-                lineWidth += measuredWidth
+                if (usedWidth + measuredWidth > maxWidth) {
+                    // 超出一行宽度。切到下一行 (宽从头，高从已使用行高之下)
+                    usedHeight = lineHeight
+                    usedWidth = 0
+                }
                 val bound = Bound()
                 bound.l = usedWidth
-                bound.t = 0
+                bound.t = usedHeight
                 bound.r = usedWidth + measuredWidth
-                bound.b = measuredHeight
+                bound.b = usedHeight + measuredHeight
                 usedWidth += measuredWidth
-                lineHeight = Math.max(lineHeight, measuredHeight)
+                // 一直记录最大使用行宽（给自己这个ViewGroup设置宽高使用）
+                lineWidth = Math.max(lineWidth, usedWidth + measuredWidth)
+                lineHeight = Math.max(lineHeight, usedHeight + measuredHeight)
                 boundList.add(bound)
             }
         }
+        // resolveSize符合父布局期望规格内，设置自己的计算值  宽：lineWidth   高： lineHeight
         setMeasuredDimension(View.resolveSize(lineWidth, widthMeasureSpec), View.resolveSize(lineHeight, heightMeasureSpec))
     }
 
