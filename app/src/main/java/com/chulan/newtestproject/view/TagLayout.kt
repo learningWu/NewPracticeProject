@@ -14,25 +14,30 @@ class TagLayout @JvmOverloads constructor(
     data class Bound(var l: Int = 0, var t: Int = 0, var r: Int = 0, var b: Int = 0)
 
     private val boundList = arrayListOf<Bound>()
-    private val bound = Bound()
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         // 测量所有子 view。存储位置。
         var usedWidth = 0
         var usedHeight = 0
-        var maxNeedWidth = 0
         var lineWidth = 0
         var lineHeight = 0
         for (i in 0 until childCount) {
             // 计算宽度
             getChildAt(i).apply {
-                measureChildWithMargins(this, widthMeasureSpec, 0, heightMeasureSpec, 0)
+                val childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
+                        0, layoutParams.width)
+                val childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec,
+                        0, layoutParams.height)
+
+                this.measure(childWidthMeasureSpec, childHeightMeasureSpec)
                 lineWidth += measuredWidth
+                val bound = Bound()
                 bound.l = usedWidth
-                bound.t = lineHeight
+                bound.t = 0
                 bound.r = usedWidth + measuredWidth
-                bound.b = usedHeight + measuredHeight
+                bound.b = measuredHeight
                 usedWidth += measuredWidth
-                usedHeight = Math.max(usedHeight, measuredHeight)
+                lineHeight = Math.max(lineHeight, measuredHeight)
+                boundList.add(bound)
             }
         }
         setMeasuredDimension(View.resolveSize(lineWidth, widthMeasureSpec), View.resolveSize(lineHeight, heightMeasureSpec))
