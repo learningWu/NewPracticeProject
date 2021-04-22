@@ -8,7 +8,7 @@ import com.chulan.newtestproject.util.dp2px
 
 
 /**
- * 仪表盘view
+ * 仪表盘view (有刻度，指针的仪表盘)
  * draw 圆弧
  * 虚线使用
  * 角度计算
