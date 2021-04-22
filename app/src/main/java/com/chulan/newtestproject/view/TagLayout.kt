@@ -48,6 +48,7 @@ class TagLayout @JvmOverloads constructor(
             }
         }
         // resolveSize符合父布局期望规格内，设置自己的计算值  宽：lineWidth   高： lineHeight
+        // lineWidth，lineHeight 是最后自己只需要多少的宽高
         setMeasuredDimension(View.resolveSize(lineWidth, widthMeasureSpec), View.resolveSize(lineHeight, heightMeasureSpec))
     }
 
