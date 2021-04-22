@@ -61,69 +61,75 @@ internal class Trie
         return node
     }
 }
+//
+//fun solveNQueens(n: Int): List<List<String>> {
+//
+//}
+//
 
 class UnionFind(var n: Int) {
-    // n 为独立集合数量
     var count = 0
-    val parent = IntArray(n)
+    var parent = IntArray(n)
 
     init {
-        // 构造独立集合
         for (i in 0 until n) {
             parent[i] = i
         }
     }
 
     /**
-     * 找到集合中的代表。（最顶层的node）
+     * 找到集合标志
      */
-    fun find(node: Int): Int {
-        var tmpNode = node
-        while (parent[tmpNode] != tmpNode) {
-            tmpNode = parent[tmpNode]
+    fun find(value: Int): Int {
+        var temp = value
+        while (parent[temp] != temp) {
+            temp = parent[temp]
         }
-        return tmpNode
+        return temp
     }
 
-    /**
-     * 合并两个集合（将其中一个的代表的parent嫁接到另一个代表下）
-     */
     fun union(a: Int, b: Int) {
         val aMark = find(a)
         val bMark = find(b)
-        if (aMark == bMark) return
+        if (aMark == bMark) {
+            // 同一个集合
+            return
+        }
         parent[aMark] = bMark
         count--
     }
+
 }
+
 
 val xDirection = intArrayOf(0, 0, 1, -1)
 val yDirection = intArrayOf(1, -1, 0, 0)
 
 fun numIslands(grid: Array<CharArray>): Int {
-    // 岛屿中所有元素建立为 独立集合
-    // 将 二维i,j 转换为 一维 index
-    val n = grid.size * grid[0].size - 1
+    val n = grid.size * grid[0].size
     val uf = UnionFind(n)
-    // 遍历二维数组，左下右上判断是否为1 ，1即合并（区域联通）
-    var result = 0
     for (i in grid.indices)
         for (j in grid[i].indices) {
-            if (grid[i][j] == '1') uf.count ++
+            if (grid[i][j] == '1')
+                uf.count++
         }
     for (i in grid.indices)
         for (j in grid[i].indices) {
             if (grid[i][j] == '1') {
                 for (k in xDirection.indices) {
-                    val directionX = i + xDirection[k]
-                    val directionY = j + yDirection[k]
-                    if (directionX in grid.indices && directionY in grid[i].indices && grid[directionX][directionY] == '1') {
-                        val a = i * grid[0].size + j
-                        val b = directionX* grid[0].size + directionY
-                        uf.union(a, b)
+                    val xForward = i + xDirection[k]
+                    val yForward = j + yDirection[k]
+                    if (xForward in grid.indices && yForward in grid[i].indices && grid[xForward][yForward] == '1') {
+                        //相同集合，合并
+                        uf.union(
+                                matrix2FlatPoi(i, j, grid[i].size),
+                                matrix2FlatPoi(xForward, yForward, grid[i].size)
+                        )
                     }
                 }
             }
         }
     return uf.count
 }
+
+fun matrix2FlatPoi(x: Int, y: Int, row: Int) = x * row + y
