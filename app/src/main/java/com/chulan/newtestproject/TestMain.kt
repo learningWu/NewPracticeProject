@@ -61,11 +61,55 @@ internal class Trie
         return node
     }
 }
-//
-//fun solveNQueens(n: Int): List<List<String>> {
-//
-//}
-//
+
+fun solveNQueens(n: Int): List<List<String>> {
+    // 把皇后放到一个空位，校验是否可以，可以进入下一层，下一层返回ok就成功，否则清除当前皇后，尝试下一个可放置的皇后位置
+    // 构建棋盘
+    val matrix = Array(n) { CharArray(n) { '.' } }
+    solve(matrix)
+}
+
+fun solve(matrix: Array<CharArray>) {
+    for (i in matrix.indices)
+        for (j in matrix[i].indices) {
+            if (matrix[i][j] == '.') {
+                // 空地可以下皇后
+
+            }
+        }
+}
+
+val xPieNa = intArrayOf(1, 1, -1, -1)
+val yPieNa = intArrayOf(1, -1, 1, -1)
+
+fun isValidQueen(i: Int, j: Int, matrix: Array<CharArray>): Boolean {
+    var result = true
+    // i 行有皇后
+    if (matrix[i].contains('Q')) result = false
+    // j 列有皇后
+    for (k in matrix.indices) {
+        if (matrix[k][j] == 'Q')
+            result = false
+    }
+    // 斜线
+    for (k in xPieNa) {
+        val xDir = i + xPieNa[k]
+        val yDir = j + yPieNa[k]
+        if (assertXYValid(xDir, yDir, arrayOf(matrix)) { matrix[xDir][yDir] == 'Q' }) {
+            result = false
+        }
+    }
+    return result
+}
+
+fun assertXYValid(x: Int, y: Int, matrix: Array<Array<*>>, block: () -> Boolean): Boolean {
+    var result = false
+    if (x in matrix.indices && y in matrix[x].indices) {
+        result = block()
+    }
+    return result
+}
+
 
 class UnionFind(var n: Int) {
     var count = 0
