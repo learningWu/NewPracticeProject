@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">NewTestProject</string>
+    <string name="avatar_text">圆形头像</string>
 </resources>

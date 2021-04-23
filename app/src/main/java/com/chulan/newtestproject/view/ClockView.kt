@@ -162,6 +162,7 @@ class ClockView @JvmOverloads constructor(
         // 画 秒针
         drawSecondPointer(canvas)
 
+        invalidate()
         postInvalidateDelayed(1000)
     }
 
