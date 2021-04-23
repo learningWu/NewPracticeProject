@@ -41,6 +41,11 @@ class PanelView @JvmOverloads constructor(
         val MINUTE_POINT_BLOCK = ScaleAndPointerDescribe(1f.dp2px(), 5f.dp2px(), 60)
 
         /**
+         * 秒针 刻度描述
+         */
+        val SECOND_POINT_BLOCK = ScaleAndPointerDescribe(0f, 0f, 60)
+
+        /**
          * 钟的起点度数为 270f (负的y轴)
          */
         const val START_ANGLE = 270f
@@ -62,8 +67,9 @@ class PanelView @JvmOverloads constructor(
     var radius: Float = 0f
         set(value) {
             field = value
-            HOUR_POINT_BLOCK.pointerLength = field * 0.75f
-            MINUTE_POINT_BLOCK.pointerLength = field * 0.5f
+            SECOND_POINT_BLOCK.pointerLength = field * 0.8f
+            MINUTE_POINT_BLOCK.pointerLength = field * 0.65f
+            HOUR_POINT_BLOCK.pointerLength = field * 0.5f
         }
     var centerCyclePoint = PointF()
 
@@ -72,6 +78,7 @@ class PanelView @JvmOverloads constructor(
             style = Paint.Style.STROKE
             strokeWidth = 2f.dp2px()
             color = Color.BLACK
+            isAntiAlias = true
         }
     }
 
@@ -147,46 +154,62 @@ class PanelView @JvmOverloads constructor(
 
         // 画 分钟 指针
         drawMinutePointer(canvas)
+
+        // 画 秒针
+        drawSecondPointer(canvas)
+
+        postInvalidateDelayed(1000)
     }
 
     private fun drawHourPointer(canvas: Canvas) {
-        val hourPointerRadian = Math.toRadians(getHourMarkAngle(day.hour).toDouble())
+        val offset = (PANEL_ANGLE /  HOUR_POINT_BLOCK.scaleNum) * (day.minute.toFloat() / 60)
+        val hourPointerRadian = Math.toRadians((getMarkAngleFromMarkAndScaleNum(day.hour, HOUR_POINT_BLOCK.scaleNum) + offset).toDouble())
         canvas.drawLine(
                 centerCyclePoint.x,
                 centerCyclePoint.y,
                 // 圆心 x起点 + 指针的 x 长度
-                centerCyclePoint.x + (Math.cos(hourPointerRadian) * MINUTE_POINT_BLOCK.pointerLength).toFloat(),
+                centerCyclePoint.x + (Math.cos(hourPointerRadian) * HOUR_POINT_BLOCK.pointerLength).toFloat(),
                 // 圆心 y起点 + 指针的 y 长度
-                centerCyclePoint.y + (Math.sin(hourPointerRadian) * MINUTE_POINT_BLOCK.pointerLength).toFloat(),
+                centerCyclePoint.y + (Math.sin(hourPointerRadian) * HOUR_POINT_BLOCK.pointerLength).toFloat(),
                 paint
         )
     }
 
     private fun drawMinutePointer(canvas: Canvas) {
-        val minutePointerRadian = Math.toRadians(getMinuteMarkAngle(day.minute).toDouble())
+        // PANEL_ANGLE /  MINUTE_POINT_BLOCK.scaleNum 秒针的格子度数
+        val offset = (PANEL_ANGLE /  MINUTE_POINT_BLOCK.scaleNum) * (day.second.toFloat() / 60)
+        val minutePointerRadian = Math.toRadians((getMarkAngleFromMarkAndScaleNum(day.minute, MINUTE_POINT_BLOCK.scaleNum) + offset).toDouble())
         canvas.drawLine(
                 centerCyclePoint.x,
                 centerCyclePoint.y,
                 // 圆心 x起点 + 指针的 x 长度
-                centerCyclePoint.x + (Math.cos(minutePointerRadian) * HOUR_POINT_BLOCK.pointerLength).toFloat(),
+                centerCyclePoint.x + (Math.cos(minutePointerRadian) * MINUTE_POINT_BLOCK.pointerLength).toFloat(),
                 // 圆心 y起点 + 指针的 y 长度
-                centerCyclePoint.y + (Math.sin(minutePointerRadian) * HOUR_POINT_BLOCK.pointerLength).toFloat(),
+                centerCyclePoint.y + (Math.sin(minutePointerRadian) * MINUTE_POINT_BLOCK.pointerLength).toFloat(),
+                paint
+        )
+    }
+
+    private fun drawSecondPointer(canvas: Canvas) {
+        val secondPointerRadian = Math.toRadians(getMarkAngleFromMarkAndScaleNum(day.second, SECOND_POINT_BLOCK.scaleNum).toDouble())
+        canvas.drawLine(
+                centerCyclePoint.x,
+                centerCyclePoint.y,
+                // 圆心 x起点 + 指针的 x 长度
+                centerCyclePoint.x + (Math.cos(secondPointerRadian) * SECOND_POINT_BLOCK.pointerLength).toFloat(),
+                // 圆心 y起点 + 指针的 y 长度
+                centerCyclePoint.y + (Math.sin(secondPointerRadian) * SECOND_POINT_BLOCK.pointerLength).toFloat(),
                 paint
         )
     }
 
     /**
-     * 获得时针刻度度数
+     * 获得指针从起始点到指定刻度的度数
+     * @param mark 刻度
+     * @param scaleNum 刻度总数
      */
-    private fun getHourMarkAngle(mark: Int): Float {
-        return START_ANGLE + PANEL_ANGLE / HOUR_POINT_BLOCK.scaleNum * mark
-    }
-
-    /**
-     * 获得分针刻度度数
-     */
-    private fun getMinuteMarkAngle(mark: Int): Float {
-        return START_ANGLE + PANEL_ANGLE / MINUTE_POINT_BLOCK.scaleNum * mark
+    private fun getMarkAngleFromMarkAndScaleNum(mark: Int, scaleNum: Int): Float {
+        return START_ANGLE + PANEL_ANGLE / scaleNum * mark
     }
 
 }
