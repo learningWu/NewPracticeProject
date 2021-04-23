@@ -1,6 +1,6 @@
 package com.chulan.newtestproject
-
-import org.w3c.dom.Node
+import java.util.*
+import kotlin.collections.HashSet
 
 fun main() {
     val array = Array(4) { CharArray(5) }
@@ -61,30 +61,43 @@ internal class Trie
         return node
     }
 }
-//
-//fun solveNQueens(n: Int): List<List<String>> {
-//    // 把皇后放到一个空位，校验是否可以，可以进入下一层，下一层返回ok就成功，否则清除当前皇后，尝试下一个可放置的皇后位置
-//    // 构建棋盘
-//    val matrix = Array(n) { CharArray(n) { '.' } }
-//    return solve(matrix)
-//}
-//
-//fun solve(matrix: Array<CharArray>):Boolean {
-//    for (i in matrix.indices)
-//        for (j in matrix[i].indices) {
-//            if (matrix[i][j] == '.') {
-//                // 空地可以下皇后
-//                if (isValidQueen(i, j, matrix)){
-//                    matrix[i][j] = 'Q'
-//                    if (solve(matrix)){
-//                        return true
-//                    }
-//                    matrix[i][j]='.'
-//                }
-//            }
-//        }
-//    return false
-//}
+
+fun solveNQueens(n: Int): List<List<String>> {
+    // 把皇后放到一个空位，校验是否可以，可以进入下一层，下一层返回ok就成功，否则清除当前皇后，尝试下一个可放置的皇后位置
+    // 构建棋盘
+    val matrix = Array(n) { CharArray(n) { '.' } }
+    solve(matrix)
+    return result
+}
+
+val visited = HashSet<Int>()
+val result = LinkedList<LinkedList<String>>()
+fun solve(matrix: Array<CharArray>): Boolean {
+    for (i in matrix.indices)
+        for (j in matrix[i].indices) {
+            if (!visited.contains(i * matrix[0].size + j) && matrix[i][j] == '.') {
+                visited.add(i * matrix[0].size + j)
+                // 空地可以下皇后
+                if (isValidQueen(i, j, matrix)) {
+                    matrix[i][j] = 'Q'
+                    if (solve(matrix)) {
+                        printChessBoardString(matrix)
+                        return true
+                    }
+                    matrix[i][j] = '.'
+                }
+            }
+        }
+    return false
+}
+
+fun printChessBoardString(matrix: Array<CharArray>) {
+    val linkedList = LinkedList<String>()
+    for (i in matrix.indices) {
+        linkedList.add(matrix[i].joinToString { it.toString() })
+    }
+    result.add(linkedList)
+}
 
 val xPieNa = intArrayOf(1, 1, -1, -1)
 val yPieNa = intArrayOf(1, -1, 1, -1)
@@ -184,3 +197,42 @@ fun numIslands(grid: Array<CharArray>): Int {
 }
 
 fun matrix2FlatPoi(x: Int, y: Int, row: Int) = x * row + y
+
+
+class Node {
+    var value: Int = 0
+    var children: List<Node>? = null
+}
+
+/**
+ * 双向 BFS
+ */
+fun doubleBFS() {
+    // 在单向BFS基础上，选择两侧中，较少可选路径进行 扩散（相当于剪枝）
+    var front = LinkedList<Node>()
+    var back = LinkedList<Node>()
+    var temp: LinkedList<Node>
+    // 开始
+    front.add(Node())
+    // 目标点
+    back.add(Node())
+    val set = HashSet<Node>()
+    // 退出条件
+    while (front.isNotEmpty() && back.isNotEmpty()) {
+        // 交换遍历队列
+        if (back.size < front.size) {
+            temp = front
+            front = back
+            back = temp
+        }
+        val node = front.pollFirst()
+        if (node !in set){
+            set.add(node)
+            // 操作node
+            node?.children?.let {
+                front.addAll(it)
+            }
+        }
+        // 相遇
+    }
+}

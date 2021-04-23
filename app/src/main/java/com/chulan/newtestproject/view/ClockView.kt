@@ -9,12 +9,12 @@ import com.chulan.newtestproject.util.dp2px
 
 
 /**
- * 仪表盘view (有刻度，指针的仪表盘)
+ * 钟表 View
  * draw 圆弧
- * 虚线使用
+ * dashEffect 使用
  * 角度计算
  */
-class PanelView @JvmOverloads constructor(
+class ClockView @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0
@@ -23,7 +23,7 @@ class PanelView @JvmOverloads constructor(
         /**
          * 仪表盘离 View 边界padding ( 避免绘制出来有被裁掉一部分)
          */
-        var PADDING = 10f.dp2px()
+        var PADDING = 30f.dp2px()
 
         /**
          * 仪表盘 扫过角度大小
@@ -79,6 +79,7 @@ class PanelView @JvmOverloads constructor(
             strokeWidth = 2f.dp2px()
             color = Color.BLACK
             isAntiAlias = true
+            textSize = 14f.dp2px()
         }
     }
 
@@ -147,6 +148,9 @@ class PanelView @JvmOverloads constructor(
         paint.pathEffect = null
         canvas.drawPath(path, paint)
 
+        // 画时间文字
+        drawTimeText(canvas)
+
         day.updateTime(System.currentTimeMillis())
 
         // 画 小时 指针
@@ -161,8 +165,21 @@ class PanelView @JvmOverloads constructor(
         postInvalidateDelayed(1000)
     }
 
+    private fun drawTimeText(canvas: Canvas) {
+        val offset = 10f.dp2px()
+        for (i in 1..12){
+            // TODO(wzx) : 需要将文字平移至中心
+            val hourPointerRadian = Math.toRadians(getMarkAngleFromMarkAndScaleNum(i, HOUR_POINT_BLOCK.scaleNum).toDouble())
+            canvas.drawText("$i",
+                    centerCyclePoint.x + (Math.cos(hourPointerRadian) * (radius + offset)).toFloat(),
+                    centerCyclePoint.y + (Math.sin(hourPointerRadian) * (radius + offset)).toFloat(),
+                    paint
+            )
+        }
+    }
+
     private fun drawHourPointer(canvas: Canvas) {
-        val offset = (PANEL_ANGLE /  HOUR_POINT_BLOCK.scaleNum) * (day.minute.toFloat() / 60)
+        val offset = (PANEL_ANGLE / HOUR_POINT_BLOCK.scaleNum) * (day.minute.toFloat() / 60)
         val hourPointerRadian = Math.toRadians((getMarkAngleFromMarkAndScaleNum(day.hour, HOUR_POINT_BLOCK.scaleNum) + offset).toDouble())
         canvas.drawLine(
                 centerCyclePoint.x,
@@ -177,7 +194,7 @@ class PanelView @JvmOverloads constructor(
 
     private fun drawMinutePointer(canvas: Canvas) {
         // PANEL_ANGLE /  MINUTE_POINT_BLOCK.scaleNum 秒针的格子度数
-        val offset = (PANEL_ANGLE /  MINUTE_POINT_BLOCK.scaleNum) * (day.second.toFloat() / 60)
+        val offset = (PANEL_ANGLE / MINUTE_POINT_BLOCK.scaleNum) * (day.second.toFloat() / 60)
         val minutePointerRadian = Math.toRadians((getMarkAngleFromMarkAndScaleNum(day.minute, MINUTE_POINT_BLOCK.scaleNum) + offset).toDouble())
         canvas.drawLine(
                 centerCyclePoint.x,

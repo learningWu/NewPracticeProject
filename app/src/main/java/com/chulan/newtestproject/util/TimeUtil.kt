@@ -3,7 +3,7 @@ package com.chulan.newtestproject.util
 import java.text.DateFormat
 import java.util.*
 
-class Day() {
+class Day {
     var hour: Int = 0
     var minute: Int = 0
     var second: Int = 0
