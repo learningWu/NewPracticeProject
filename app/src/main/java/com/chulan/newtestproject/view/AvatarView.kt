@@ -11,7 +11,7 @@ import com.chulan.newtestproject.util.dp2px
 /**
  * @author wzx
  * 圆形头像 View
- * 训练 Xfermode
+ * 训练 Xfermode SRC_IN 相交部分显示（貌似下层渲染的如果没相交还会显示，上层只显示相交）
  */
 class AvatarView @JvmOverloads constructor(
         context: Context,
@@ -25,6 +25,10 @@ class AvatarView @JvmOverloads constructor(
     private var paint: Paint = Paint()
 
     private var saveArea: RectF = RectF()
+
+    private val xfermode by lazy {
+        PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
+    }
 
     init {
 
@@ -42,14 +46,19 @@ class AvatarView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         // 离屏缓冲
+        val bitmap = getBitmap()
         val saveLayer = canvas.saveLayer(saveArea, paint)
-        canvas.drawOval(saveArea,paint)
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-        getBitmap()?.let { canvas.drawBitmap(it, PADDING, PADDING, paint) }
+        val bitmapWidth = bitmap?.width?.toFloat() ?: 0f
+        val bitmapHeight = bitmap?.height?.toFloat() ?: 0f
+        val radius = Math.min(bitmapWidth, bitmapHeight) / 2
+        canvas.drawCircle(bitmapWidth / 2, bitmapHeight / 2, radius, paint)
+        paint.xfermode = xfermode
+        bitmap?.let { canvas.drawBitmap(it, PADDING, PADDING, paint) }
         paint.xfermode = null
         canvas.restoreToCount(saveLayer)
+
     }
 
-    private fun getBitmap() = decodeSampledBitmapFromResource(resources, R.mipmap.icon_teacher, width, height)
+    private fun getBitmap() = decodeSampledBitmapFromResource(resources, R.mipmap.avatar, width, height)
 
 }

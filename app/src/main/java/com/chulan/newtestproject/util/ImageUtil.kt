@@ -29,19 +29,16 @@ fun decodeSampledBitmapFromResource(res: Resources?,
     // BEGIN_INCLUDE (read_bitmap_dimensions)
     // First decode with inJustDecodeBounds=true to check dimensions
     val options = BitmapFactory.Options()
-//    options.inJustDecodeBounds = true
-//    BitmapFactory.decodeResource(res, resId, options)
+    options.inJustDecodeBounds = true
+    BitmapFactory.decodeResource(res, resId, options)
 //
 //    // Calculate inSampleSize
-//    options.inSampleSize = calculateInSampleSize(options, reqWidth,
-//            reqHeight)
+    options.inSampleSize = calculateInSampleSize(options, reqWidth,
+            reqHeight)
     // END_INCLUDE (read_bitmap_dimensions)
 
     // Decode bitmap with inSampleSize set
     options.inJustDecodeBounds = false
-    // TODO(wzx) : 等于期望大小
-    options.outWidth = reqWidth
-    options.outHeight = reqHeight
     return BitmapFactory.decodeResource(res, resId, options)
 }
 
