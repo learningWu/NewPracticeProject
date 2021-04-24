@@ -209,15 +209,17 @@ class Node {
  */
 fun doubleBFS() {
     // 在单向BFS基础上，选择两侧中，较少可选路径进行 扩散（相当于剪枝）
-    var front = LinkedList<Node>()
-    var back = LinkedList<Node>()
-    var temp: LinkedList<Node>
+    var front = HashSet<Node>()
+    var back = HashSet<Node>()
+    var temp: HashSet<Node>
     // 开始
     front.add(Node())
     // 目标点
     back.add(Node())
-    val set = HashSet<Node>()
+    val visitedSet = HashSet<Node>()
     // 退出条件
+    // 两个方向都没有可遍历的节点（都被 visited 了）
+    var level = 1
     while (front.isNotEmpty() && back.isNotEmpty()) {
         // 交换遍历队列
         if (back.size < front.size) {
@@ -225,14 +227,15 @@ fun doubleBFS() {
             front = back
             back = temp
         }
-        val node = front.pollFirst()
-        if (node !in set){
-            set.add(node)
-            // 操作node
-            node?.children?.let {
-                front.addAll(it)
+        val next = HashSet<Node>()
+        for (node in front){
+            if (node !in visitedSet){
+                visitedSet.add(node)
+                // 将下一层先缓存
+                node.children?.let { next.addAll(it) }
             }
         }
-        // 相遇
+        front = next
+        level ++
     }
 }

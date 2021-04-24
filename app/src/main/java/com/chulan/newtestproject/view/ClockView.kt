@@ -2,6 +2,7 @@ package com.chulan.newtestproject.view
 
 import android.content.Context
 import android.graphics.*
+import android.graphics.Paint.Align
 import android.util.AttributeSet
 import android.view.View
 import com.chulan.newtestproject.util.Day
@@ -73,6 +74,8 @@ class ClockView @JvmOverloads constructor(
         }
     var centerCyclePoint = PointF()
 
+    private val mFontMetrics = Paint.FontMetrics()
+
     init {
         paint.apply {
             style = Paint.Style.STROKE
@@ -80,6 +83,8 @@ class ClockView @JvmOverloads constructor(
             color = Color.BLACK
             isAntiAlias = true
             textSize = 14f.dp2px()
+            textAlign = Align.CENTER
+            paint.getFontMetrics(mFontMetrics)
         }
     }
 
@@ -166,16 +171,23 @@ class ClockView @JvmOverloads constructor(
         postInvalidateDelayed(1000)
     }
 
+    private val textBound = Rect()
+
     private fun drawTimeText(canvas: Canvas) {
         val offset = 10f.dp2px()
-        for (i in 1..12){
-            // TODO(wzx) : 需要将文字平移至中心
+        for (i in 1..12) {
             val hourPointerRadian = Math.toRadians(getMarkAngleFromMarkAndScaleNum(i, HOUR_POINT_BLOCK.scaleNum).toDouble())
-            canvas.drawText("$i",
-                    centerCyclePoint.x + (Math.cos(hourPointerRadian) * (radius + offset)).toFloat(),
-                    centerCyclePoint.y + (Math.sin(hourPointerRadian) * (radius + offset)).toFloat(),
-                    paint
-            )
+            val text = "$i"
+            val x = centerCyclePoint.x + (Math.cos(hourPointerRadian) * (radius + offset)).toFloat()
+            val y = centerCyclePoint.y + (Math.sin(hourPointerRadian) * (radius + offset)).toFloat()
+            val offset = (mFontMetrics.ascent + mFontMetrics.descent) / 2
+            canvas.drawText(text, x, y - offset, paint)
+            // 第一种方法实现
+//            paint.getTextBounds(text, 0, text.length, textBound)
+//            // 文字默认以底部中心为y点。需要将文字向下偏移部分才能实现居中
+//            val offset = (textBound.top + textBound.bottom) / 2
+//            canvas.drawText(text, x, y - offset, paint)
+
         }
     }
 

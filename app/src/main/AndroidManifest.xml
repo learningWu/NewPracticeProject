@@ -19,6 +19,10 @@
         </activity>
         <activity android:name=".activity.AvatarActivity"
             android:label="@string/avatar_text"/>
+        <activity android:name=".activity.ClockActivity"
+            android:label="@string/clock_text"/>
+        <activity android:name=".activity.TagLayoutActivity"
+            android:label="@string/tag_layout_text"/>
     </application>
 
 </manifest>

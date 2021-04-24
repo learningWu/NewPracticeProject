@@ -7,6 +7,7 @@ import android.view.View
 import com.chulan.newtestproject.R
 import com.chulan.newtestproject.util.decodeSampledBitmapFromResource
 import com.chulan.newtestproject.util.dp2px
+import com.chulan.newtestproject.util.dp2pxInt
 
 /**
  * @author wzx
@@ -58,6 +59,17 @@ class AvatarView @JvmOverloads constructor(
         canvas.restoreToCount(saveLayer)
 
     }
+
+//    private fun getAvatar(width: Int):Bitmap {
+//        val options = BitmapFactory.Options()
+//        options.inJustDecodeBounds = true
+//        BitmapFactory.decodeResource(resources, R.mipmap.avatar, options)
+//        options.inJustDecodeBounds = false
+//        options.inDensity = options.outWidth
+//        options.inTargetDensity = width
+//        options.outHeight = options.outWidth
+//        return BitmapFactory.decodeResource(resources,R.mipmap.avatar,options)
+//    }
 
     private fun getBitmap() = decodeSampledBitmapFromResource(resources, R.mipmap.avatar, width, height)
 

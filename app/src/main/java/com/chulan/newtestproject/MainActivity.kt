@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.view.setPadding
 import com.chulan.newtestproject.activity.AvatarActivity
+import com.chulan.newtestproject.activity.ClockActivity
+import com.chulan.newtestproject.activity.TagLayoutActivity
 import com.chulan.newtestproject.ext.startActivity
 import com.chulan.newtestproject.util.dp2px
 import com.chulan.newtestproject.util.dp2pxInt
@@ -26,13 +28,19 @@ class MainActivity : AppCompatActivity() {
         addItem(getString(R.string.avatar_text)) {
             startActivity<AvatarActivity>()
         }
+        addItem(getString(R.string.clock_text)) {
+            startActivity<ClockActivity>()
+        }
+        addItem(getString(R.string.tag_layout_text)) {
+            startActivity<TagLayoutActivity>()
+        }
     }
 
     private fun addItem(title: String, block: () -> Unit) {
         llContainer.addView(TextView(this).apply {
             text = title
             layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            setPadding(5f.dp2pxInt())
+            setPadding(10f.dp2pxInt())
             setOnClickListener {
                 block()
             }
