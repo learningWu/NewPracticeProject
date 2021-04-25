@@ -23,6 +23,8 @@
             android:label="@string/clock_text"/>
         <activity android:name=".activity.TagLayoutActivity"
             android:label="@string/tag_layout_text"/>
+        <activity android:name=".activity.FlipActivity"
+            android:label="@string/flip_book"/>
     </application>
 
 </manifest>

@@ -3,4 +3,5 @@
     <string name="avatar_text">圆形头像</string>
     <string name="clock_text">时钟</string>
     <string name="tag_layout_text">标签布局</string>
+    <string name="flip_book">翻书动效</string>
 </resources>
