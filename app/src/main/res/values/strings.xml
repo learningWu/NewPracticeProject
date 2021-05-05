@@ -4,4 +4,5 @@
     <string name="clock_text">时钟</string>
     <string name="tag_layout_text">标签布局</string>
     <string name="flip_book">翻书动效</string>
+    <string name="scalable_image">放大缩放图片</string>
 </resources>

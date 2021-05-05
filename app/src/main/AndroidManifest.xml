@@ -25,6 +25,8 @@
             android:label="@string/tag_layout_text"/>
         <activity android:name=".activity.FlipActivity"
             android:label="@string/flip_book"/>
+        <activity android:name=".activity.ScalableImageViewActivity"
+            android:label="@string/scalable_image"/>
     </application>
 
 </manifest>

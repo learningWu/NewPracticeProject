@@ -1,14 +1,16 @@
 package com.chulan.newtestproject
+
 import java.util.*
 import kotlin.collections.HashSet
 
 fun main() {
-    val array = Array(4) { CharArray(5) }
-    array[0] = charArrayOf('1', '1', '1', '1', '0')
-    array[1] = charArrayOf('1', '1', '0', '1', '0')
-    array[2] = charArrayOf('1', '1', '0', '0', '0')
-    array[3] = charArrayOf('0', '0', '0', '0', '0')
-    numIslands(array)
+//    val array = Array(4) { CharArray(5) }
+//    array[0] = charArrayOf('1', '1', '1', '1', '0')
+//    array[1] = charArrayOf('1', '1', '0', '1', '0')
+//    array[2] = charArrayOf('1', '1', '0', '0', '0')
+//    array[3] = charArrayOf('0', '0', '0', '0', '0')
+//    numIslands(array)
+    hammingWeight(1001)
 }
 
 internal class Trie
@@ -228,14 +230,45 @@ fun doubleBFS() {
             back = temp
         }
         val next = HashSet<Node>()
-        for (node in front){
-            if (node !in visitedSet){
+        for (node in front) {
+            if (node !in visitedSet) {
                 visitedSet.add(node)
                 // 将下一层先缓存
                 node.children?.let { next.addAll(it) }
             }
         }
         front = next
-        level ++
+        level++
     }
+}
+
+fun hammingWeight(n: Int): Int {
+    // 方法 1 ：将末尾 1 打掉。直到数值为0
+//    var value = n
+//    var count = 0
+//    while (value != 0) {
+//        count++
+//        value = value and value - 1
+//    }
+//    return count
+    // 方法 2：遍历二进制位，计1个数
+    var count = 0
+    for (i in 0..31) {
+        if (n and 1.shl(i) > 0)
+            count++
+    }
+    return count
+}
+
+fun isPowerOfTwo(n: Int): Boolean {
+    if (n == 0) return false
+    return (n and n - 1) == 0
+}
+
+fun reverseBits(n: Int): Int {
+    var res = 0
+    for (i in 0 until 32) {
+        res += ((n shr i) and 1).shl(31 - i)
+    }
+    return res
 }
