@@ -1,5 +1,6 @@
 package com.chulan.newtestproject.view
 
+import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.content.Context
 import android.graphics.Canvas
@@ -121,7 +122,24 @@ class ScalableImageView @JvmOverloads constructor(
         })
     }
 
-    private val animator = ObjectAnimator.ofFloat(this, "frascation", 0f, 1f)
+    private val animator = ObjectAnimator.ofFloat(this, "frascation", 0f, 1f).apply {
+        addListener(object :Animator.AnimatorListener{
+            override fun onAnimationStart(animation: Animator?) {
+            }
+
+            override fun onAnimationEnd(animation: Animator?) {
+                offsetX = 0f
+                offsetY = 0f
+                invalidate()
+            }
+
+            override fun onAnimationCancel(animation: Animator?) {
+            }
+
+            override fun onAnimationRepeat(animation: Animator?) {
+            }
+        })
+    }
 
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -145,11 +163,8 @@ class ScalableImageView @JvmOverloads constructor(
         val bitmapHeight = bitmap.height.toFloat()
 
         // 注意是要先 scale 放大后平移，所以要 “反着写”
-        if (!isBig) {
-            offsetY = 0f
-            offsetX = 0f
-        }
-        canvas.translate(offsetX, offsetY)
+        // TODO(wzx) : offset 也跟随 动画frascation 就会流畅
+        canvas.translate(offsetX * frascation, offsetY * frascation)
 
         val x = (width - bitmapWidth) / 2f
         val y = (height - bitmapHeight) / 2f
