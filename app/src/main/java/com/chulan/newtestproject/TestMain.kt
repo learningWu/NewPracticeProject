@@ -10,7 +10,22 @@ fun main() {
 //    array[2] = charArrayOf('1', '1', '0', '0', '0')
 //    array[3] = charArrayOf('0', '0', '0', '0', '0')
 //    numIslands(array)
-    hammingWeight(1001)
+    val bloomFilter = BloomFilter(3, 1024)
+    bloomFilter.add(360)
+    if (bloomFilter.contains(360)) {
+        print("有360")
+    }
+    if (bloomFilter.contains(361)) {
+        print("有361")
+    } else {
+        print("没有361 ")
+    }
+    bloomFilter.clear()
+    if (bloomFilter.contains(360)) {
+        print("有360")
+    } else {
+        print("没有360")
+    }
 }
 
 internal class Trie
@@ -271,4 +286,52 @@ fun reverseBits(n: Int): Int {
         res += ((n shr i) and 1).shl(31 - i)
     }
     return res
+}
+
+
+/**
+ * 布隆过滤器
+ */
+class BloomFilter(var n: Int, var m: Int) {
+    var bitSet: BitSet = BitSet(m)
+    val randomHelper by lazy {
+        RandomHelper(n, m)
+    }
+
+    fun add(o: Any) {
+        randomHelper.init(o)
+        for (value in randomHelper) {
+            bitSet[value] = true
+        }
+    }
+
+    fun contains(o: Any): Boolean {
+        randomHelper.init(o)
+        for (value in randomHelper) {
+            if (!bitSet[value])
+                return false
+        }
+        return true
+    }
+
+    fun clear() {
+        bitSet.clear()
+    }
+
+    class RandomHelper(var maxCount: Int, var randomArea: Int) : Iterator<Int> {
+        val random = Random()
+        var count = 0
+        fun init(o: Any) {
+            count = 0
+            random.setSeed(o.hashCode().toLong())
+        }
+
+        override fun next(): Int {
+            return Math.abs(random.nextInt() % randomArea)
+        }
+
+        override fun hasNext(): Boolean {
+            return count++ < maxCount
+        }
+    }
 }

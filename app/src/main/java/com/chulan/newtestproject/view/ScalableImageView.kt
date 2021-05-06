@@ -8,17 +8,21 @@ import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import android.widget.OverScroller
 import androidx.core.view.GestureDetectorCompat
 import com.chulan.newtestproject.R
 import com.chulan.newtestproject.util.decodeSampledBitmapFromResource
 import com.chulan.newtestproject.util.noOpDelegate
 import java.lang.Math.abs
 
+/**
+ * 放缩图片，惯性滑动
+ */
 class ScalableImageView @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0
-) : View(context, attrs, defStyleAttr) {
+) : View(context, attrs, defStyleAttr),Runnable {
     private var paint: Paint = Paint()
     private val bitmap by lazy {
         decodeSampledBitmapFromResource(resources, R.mipmap.avatar, width, height)!!
@@ -35,6 +39,8 @@ class ScalableImageView @JvmOverloads constructor(
     private var smallScale = 0f
 
     private var isBig = false
+
+    private var overScale = 1f
 
     var frascation = 0f
         set(value) {
@@ -63,15 +69,29 @@ class ScalableImageView @JvmOverloads constructor(
                 if (wantOffsetY > 0) {
                     offsetY = Math.min((bitmap.height * bigScale - height) / 2f, wantOffsetY)
                 } else {
-                    offsetY = Math.max((bitmap.height * bigScale - height) / 2f, wantOffsetY)
+                    offsetY = Math.max(-(bitmap.height * bigScale - height) / 2f, wantOffsetY)
                 }
-
-
                 invalidate()
             }
             return true
         }
+
+        override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
+            // 惯性滑动
+            if (isBig) {
+                overScroller.fling(offsetX.toInt(), offsetY.toInt(), velocityX.toInt(), velocityY.toInt(),
+                        (-(bitmap.width * bigScale - width) / 2f).toInt(),
+                        ((bitmap.width * bigScale - width) / 2f).toInt(),
+                        (-(bitmap.height * bigScale - height) / 2f).toInt(),
+                        ((bitmap.height * bigScale - height) / 2f).toInt()
+                )
+                postOnAnimation(this@ScalableImageView)
+            }
+            return true
+        }
     })
+
+    val overScroller = OverScroller(context)
 
     init {
         gestureDetector.setOnDoubleTapListener(object : GestureDetector.OnDoubleTapListener {
@@ -107,10 +127,10 @@ class ScalableImageView @JvmOverloads constructor(
         if (bitmap.width / bitmap.height > width / height) {
             // 宽更容易接近边，故 smallScale是 放大宽
             smallScale = width / bitmap.width.toFloat()
-            bigScale = height / bitmap.height.toFloat()
+            bigScale = height / bitmap.height.toFloat() + overScale
         } else {
             smallScale = height / bitmap.height.toFloat()
-            bigScale = width / bitmap.width.toFloat()
+            bigScale = width / bitmap.width.toFloat() + overScale
         }
     }
 
@@ -132,5 +152,16 @@ class ScalableImageView @JvmOverloads constructor(
         canvas.scale(scale, scale, width / 2f, height / 2f)
         // 绘制到View中间
         canvas.drawBitmap(bitmap, x, y, paint)
+    }
+
+    override fun run() {
+        // 循环执行 fling 动画
+        // 滑动未结束时 computeScrollOffset -> true
+        if (overScroller.computeScrollOffset()){
+            offsetX = overScroller.currX.toFloat()
+            offsetY = overScroller.currY.toFloat()
+            invalidate()
+            postOnAnimation(this)
+        }
     }
 }
