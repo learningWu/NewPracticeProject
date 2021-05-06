@@ -24,26 +24,32 @@ class TagLayout @JvmOverloads constructor(
         for (i in 0 until childCount) {
             // 计算宽度
             getChildAt(i).apply {
-                val childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
-                        0, layoutParams.width)
-                val childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec,
-                        0, layoutParams.height)
-
-                this.measure(childWidthMeasureSpec, childHeightMeasureSpec)
+                measureChildWithMargins(this, widthMeasureSpec, 0, heightMeasureSpec, 0)
+//                val childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
+//                        0, layoutParams.width)
+//                val childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec,
+//                        0, layoutParams.height)
+//
+//                this.measure(childWidthMeasureSpec, childHeightMeasureSpec)
                 if (usedWidth + measuredWidth > maxWidth) {
                     // 超出一行宽度。切到下一行 (宽从头，高从已使用行高之下)
                     usedHeight = lineHeight
                     usedWidth = 0
                 }
                 val bound = Bound()
-                bound.l = usedWidth
-                bound.t = usedHeight
-                bound.r = usedWidth + measuredWidth
-                bound.b = usedHeight + measuredHeight
-                usedWidth += measuredWidth
+                // 将 margin 添加到 layout 位置
+                bound.l = usedWidth + (layoutParams as MarginLayoutParams).leftMargin
+                bound.t = usedHeight + (layoutParams as MarginLayoutParams).topMargin
+                bound.r = usedWidth + (layoutParams as MarginLayoutParams).leftMargin + measuredWidth
+                bound.b = usedHeight + (layoutParams as MarginLayoutParams).topMargin + measuredHeight
+                usedWidth += (measuredWidth + (layoutParams as MarginLayoutParams).leftMargin
+                        + (layoutParams as MarginLayoutParams).rightMargin)
                 // 一直记录最大使用行宽（给自己这个ViewGroup设置宽高使用）
                 lineWidth = Math.max(lineWidth, usedWidth + measuredWidth)
-                lineHeight = Math.max(lineHeight, usedHeight + measuredHeight)
+                lineHeight = Math.max(lineHeight, usedHeight
+                        + (layoutParams as MarginLayoutParams).topMargin
+                        + (layoutParams as MarginLayoutParams).bottomMargin
+                        + measuredHeight)
                 boundList.add(bound)
             }
         }
@@ -58,5 +64,14 @@ class TagLayout @JvmOverloads constructor(
                 layout(boundList[i].l, boundList[i].t, boundList[i].r, boundList[i].b)
             }
         }
+    }
+
+    /**
+     * 父布局给子View生成的 LayoutParams
+     * （挺嚣张）
+     */
+    override fun generateLayoutParams(attrs: AttributeSet?): LayoutParams {
+        val params = MarginLayoutParams(context, attrs)
+        return params
     }
 }

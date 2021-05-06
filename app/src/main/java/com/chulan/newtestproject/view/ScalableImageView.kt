@@ -4,6 +4,8 @@ import android.animation.ObjectAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Point
+import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -22,7 +24,7 @@ class ScalableImageView @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0
-) : View(context, attrs, defStyleAttr),Runnable {
+) : View(context, attrs, defStyleAttr), Runnable {
     private var paint: Paint = Paint()
     private val bitmap by lazy {
         decodeSampledBitmapFromResource(resources, R.mipmap.avatar, width, height)!!
@@ -50,6 +52,8 @@ class ScalableImageView @JvmOverloads constructor(
 
     var offsetX = 0f
     var offsetY = 0f
+
+    var doubleClickPointF = PointF()
     val gestureDetector = GestureDetectorCompat(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent?): Boolean {
             return true
@@ -99,7 +103,9 @@ class ScalableImageView @JvmOverloads constructor(
                 return true
             }
 
-            override fun onDoubleTap(e: MotionEvent?): Boolean {
+            override fun onDoubleTap(e: MotionEvent): Boolean {
+                doubleClickPointF.x = e.x
+                doubleClickPointF.y = e.y
                 isBig = !isBig
                 if (isBig) {
                     animator.start()
@@ -149,6 +155,8 @@ class ScalableImageView @JvmOverloads constructor(
         val y = (height - bitmapHeight) / 2f
 
         val scale = smallScale + ((bigScale - smallScale) * frascation)
+//        val pivotX = if (doubleClickPointF.x > 0) doubleClickPointF.x else width / 2f
+//        val pivotY = if (doubleClickPointF.y > 0) doubleClickPointF.y else height / 2f
         canvas.scale(scale, scale, width / 2f, height / 2f)
         // 绘制到View中间
         canvas.drawBitmap(bitmap, x, y, paint)
@@ -157,7 +165,7 @@ class ScalableImageView @JvmOverloads constructor(
     override fun run() {
         // 循环执行 fling 动画
         // 滑动未结束时 computeScrollOffset -> true
-        if (overScroller.computeScrollOffset()){
+        if (overScroller.computeScrollOffset()) {
             offsetX = overScroller.currX.toFloat()
             offsetY = overScroller.currY.toFloat()
             invalidate()
