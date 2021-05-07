@@ -1,11 +1,9 @@
 package com.chulan.newtestproject.view
 
-import android.animation.Animator
 import android.animation.ObjectAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.Point
 import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.GestureDetector
@@ -14,11 +12,8 @@ import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.OverScroller
 import androidx.core.view.GestureDetectorCompat
-import androidx.core.view.ScaleGestureDetectorCompat
 import com.chulan.newtestproject.R
 import com.chulan.newtestproject.util.decodeSampledBitmapFromResource
-import com.chulan.newtestproject.util.noOpDelegate
-import java.lang.Math.abs
 
 /**
  * 放缩图片，惯性滑动
@@ -47,13 +42,14 @@ class ScalableImageView @JvmOverloads constructor(
 
     private var overScale = 1f
 
-    var frascation = 0f
+    var currentScale = smallScale
         set(value) {
-            field = value
-            invalidate()
+            if (value in smallScale.rangeTo(bigScale) && value != currentScale) {
+                field = value
+                invalidate()
+            }
         }
 
-    var currentScale = 0f
     var offsetX = 0f
     var offsetY = 0f
 
@@ -101,19 +97,22 @@ class ScalableImageView @JvmOverloads constructor(
 
     val overScroller = OverScroller(context)
 
-//    val scaleGestureDetectorCompat = ScaleGestureDetector(context,object :ScaleGestureDetector.OnScaleGestureListener{
-//        override fun onScaleBegin(detector: ScaleGestureDetector?): Boolean {
-//
-//            return true
-//        }
-//
-//        override fun onScaleEnd(detector: ScaleGestureDetector?) {
-//        }
-//
-//        override fun onScale(detector: ScaleGestureDetector): Boolean {
-//            detector.scaleFactor
-//        }
-//    })
+    val scaleGestureDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.OnScaleGestureListener {
+        private var initialScale = 0f
+        override fun onScaleBegin(detector: ScaleGestureDetector?): Boolean {
+            initialScale = currentScale
+            return true
+        }
+
+        override fun onScaleEnd(detector: ScaleGestureDetector?) {
+        }
+
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            currentScale = initialScale * detector.scaleFactor
+            // 返回 true 会更新 prev 值（怪异现象）
+            return false
+        }
+    })
 
     init {
         gestureDetector.setOnDoubleTapListener(object : GestureDetector.OnDoubleTapListener {
@@ -125,14 +124,17 @@ class ScalableImageView @JvmOverloads constructor(
                 doubleClickPointF.x = e.x
                 doubleClickPointF.y = e.y
                 isBig = !isBig
+
                 if (isBig) {
                     // 将点击位置偏移回来( 点击位置为锚点放大图片的效果 )
                     offsetX = (e.x - width / 2) - (e.x - width / 2) * bigScale / smallScale
                     offsetY = (e.y - height / 2) - (e.y - height / 2) * bigScale / smallScale
                     invalidate()
+                    animator.setFloatValues(currentScale, bigScale)
                     animator.start()
                 } else {
-                    animator.reverse()
+                    animator.setFloatValues(currentScale, smallScale)
+                    animator.start()
                 }
                 return true
             }
@@ -143,28 +145,17 @@ class ScalableImageView @JvmOverloads constructor(
         })
     }
 
-    private val animator = ObjectAnimator.ofFloat(this, "frascation", 0f, 1f).apply {
-//        addListener(object : Animator.AnimatorListener {
-//            override fun onAnimationStart(animation: Animator?) {
-//            }
-//
-//            override fun onAnimationEnd(animation: Animator?) {
-//                offsetX = 0f
-//                offsetY = 0f
-//                invalidate()
-//            }
-//
-//            override fun onAnimationCancel(animation: Animator?) {
-//            }
-//
-//            override fun onAnimationRepeat(animation: Animator?) {
-//            }
-//        })
-    }
+    private val animator = ObjectAnimator.ofFloat(this, "currentScale", 0f, 1f)
 
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        return gestureDetector.onTouchEvent(event)
+        // 优先双指放大手势
+        var res = scaleGestureDetector.onTouchEvent(event)
+        if (!scaleGestureDetector.isInProgress) {
+            // 其次单击双击滑动等手势
+            res = gestureDetector.onTouchEvent(event)
+        }
+        return res
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -177,21 +168,21 @@ class ScalableImageView @JvmOverloads constructor(
             smallScale = height / bitmap.height.toFloat()
             bigScale = width / bitmap.width.toFloat() + overScale
         }
+        currentScale = smallScale
     }
 
     override fun onDraw(canvas: Canvas) {
         val bitmapWidth = bitmap.width.toFloat()
         val bitmapHeight = bitmap.height.toFloat()
 
-        // 注意是要先 scale 放大后平移，所以要 “反着写”
-        // TODO(wzx) : offset 也跟随 动画frascation 就会流畅
-        canvas.translate(offsetX * frascation, offsetY * frascation)
+        // 注意是要先 scale 放大后平移，所以要 “反着写”  (offset 也跟随 动画frascation 就会流畅)
+        val fracsation = (currentScale - smallScale) / (bigScale - smallScale)
+        canvas.translate(offsetX * fracsation, offsetY * fracsation)
 
         val x = (width - bitmapWidth) / 2f
         val y = (height - bitmapHeight) / 2f
 
-        val scale = smallScale + ((bigScale - smallScale) * frascation)
-        canvas.scale(scale, scale, width / 2f, height / 2f)
+        canvas.scale(currentScale, currentScale, width / 2f, height / 2f)
         // 绘制到View中间
         canvas.drawBitmap(bitmap, x, y, paint)
     }
