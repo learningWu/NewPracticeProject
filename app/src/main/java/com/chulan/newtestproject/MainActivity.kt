@@ -38,6 +38,9 @@ class MainActivity : AppCompatActivity() {
         addItem(getString(R.string.scalable_image)) {
             startActivity<ScalableImageViewActivity>()
         }
+        addItem(getString(R.string.multi_pointer_control_image)) {
+            startActivity<MultiPointerControlActivity>()
+        }
     }
 
     private fun addItem(title: String, block: () -> Unit) {
