@@ -10,9 +10,11 @@ import android.graphics.PointF
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.OverScroller
 import androidx.core.view.GestureDetectorCompat
+import androidx.core.view.ScaleGestureDetectorCompat
 import com.chulan.newtestproject.R
 import com.chulan.newtestproject.util.decodeSampledBitmapFromResource
 import com.chulan.newtestproject.util.noOpDelegate
@@ -51,6 +53,7 @@ class ScalableImageView @JvmOverloads constructor(
             invalidate()
         }
 
+    var currentScale = 0f
     var offsetX = 0f
     var offsetY = 0f
 
@@ -98,6 +101,20 @@ class ScalableImageView @JvmOverloads constructor(
 
     val overScroller = OverScroller(context)
 
+//    val scaleGestureDetectorCompat = ScaleGestureDetector(context,object :ScaleGestureDetector.OnScaleGestureListener{
+//        override fun onScaleBegin(detector: ScaleGestureDetector?): Boolean {
+//
+//            return true
+//        }
+//
+//        override fun onScaleEnd(detector: ScaleGestureDetector?) {
+//        }
+//
+//        override fun onScale(detector: ScaleGestureDetector): Boolean {
+//            detector.scaleFactor
+//        }
+//    })
+
     init {
         gestureDetector.setOnDoubleTapListener(object : GestureDetector.OnDoubleTapListener {
             override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
@@ -109,6 +126,10 @@ class ScalableImageView @JvmOverloads constructor(
                 doubleClickPointF.y = e.y
                 isBig = !isBig
                 if (isBig) {
+                    // 将点击位置偏移回来( 点击位置为锚点放大图片的效果 )
+                    offsetX = (e.x - width / 2) - (e.x - width / 2) * bigScale / smallScale
+                    offsetY = (e.y - height / 2) - (e.y - height / 2) * bigScale / smallScale
+                    invalidate()
                     animator.start()
                 } else {
                     animator.reverse()
@@ -123,22 +144,22 @@ class ScalableImageView @JvmOverloads constructor(
     }
 
     private val animator = ObjectAnimator.ofFloat(this, "frascation", 0f, 1f).apply {
-        addListener(object :Animator.AnimatorListener{
-            override fun onAnimationStart(animation: Animator?) {
-            }
-
-            override fun onAnimationEnd(animation: Animator?) {
-                offsetX = 0f
-                offsetY = 0f
-                invalidate()
-            }
-
-            override fun onAnimationCancel(animation: Animator?) {
-            }
-
-            override fun onAnimationRepeat(animation: Animator?) {
-            }
-        })
+//        addListener(object : Animator.AnimatorListener {
+//            override fun onAnimationStart(animation: Animator?) {
+//            }
+//
+//            override fun onAnimationEnd(animation: Animator?) {
+//                offsetX = 0f
+//                offsetY = 0f
+//                invalidate()
+//            }
+//
+//            override fun onAnimationCancel(animation: Animator?) {
+//            }
+//
+//            override fun onAnimationRepeat(animation: Animator?) {
+//            }
+//        })
     }
 
 
@@ -170,8 +191,6 @@ class ScalableImageView @JvmOverloads constructor(
         val y = (height - bitmapHeight) / 2f
 
         val scale = smallScale + ((bigScale - smallScale) * frascation)
-//        val pivotX = if (doubleClickPointF.x > 0) doubleClickPointF.x else width / 2f
-//        val pivotY = if (doubleClickPointF.y > 0) doubleClickPointF.y else height / 2f
         canvas.scale(scale, scale, width / 2f, height / 2f)
         // 绘制到View中间
         canvas.drawBitmap(bitmap, x, y, paint)
