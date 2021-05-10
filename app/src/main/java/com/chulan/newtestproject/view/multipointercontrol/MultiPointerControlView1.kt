@@ -1,4 +1,4 @@
-package com.chulan.newtestproject.view
+package com.chulan.newtestproject.view.multipointercontrol
 
 import android.content.Context
 import android.graphics.Canvas
@@ -14,8 +14,9 @@ import com.chulan.newtestproject.util.decodeSampledBitmapFromResource
 
 /**
  * Created by wuzixuan on 2021/5/7
+ * 接力型多点触控
  */
-class MultiPointerControlView @JvmOverloads constructor(
+class MultiPointerControlView1 @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0
