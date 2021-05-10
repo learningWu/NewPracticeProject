@@ -336,40 +336,51 @@ class BloomFilter(var n: Int, var m: Int) {
     }
 }
 
+
+fun reversePairs(nums: IntArray): Int {
+    return mergeSort(nums, 0, nums.size - 1)
+}
+
 fun mergeSort(nums: IntArray, left: Int, right: Int): Int {
     if (left >= right) return 0
     val mid = left + (right - left).shr(1)
-    // 左边有序
+    // order left
     val leftCount = mergeSort(nums, left, mid)
-    // 右边有序
+    // order right
     val rightCount = mergeSort(nums, mid + 1, right)
-    // 合并两个有序
+    // merge left and right
     return leftCount + rightCount + merge(nums, left, mid, right)
 }
 
 fun merge(nums: IntArray, left: Int, mid: Int, right: Int): Int {
-    // 合并后的排序数组
-    val temp = IntArray(right - left + 1)
-    var k = 0
+    var counter = 0
     var i = left
     var j = mid + 1
-    var counter = 0
-    while (i <= mid && j <= right) {
-        // 注意 if (nums[i] <= nums[j]) 如果没有 = 会将后面相等元素提到前面来，变成不稳定算法
-        temp[k++] = if (nums[i] <= nums[j]) {
-            nums[i++]
+    val temp = IntArray(right - left + 1)
+    var k = 0
+
+    var n = left
+    var m = mid + 1
+
+    // 计算 重要翻转对
+    while (n <= mid && m <= right) {
+        // 左右两个区域
+        if (nums[n].toLong() / 2f > nums[m].toLong()) {
+            // 左边比得过的，全员累计 ( 每一个都能和 nums[m] “组队”，nums[m]组过队了，右边往后)
+            counter += (mid - n + 1)
+            m++
         } else {
-            counter += (mid - i + 1)
-            nums[j++]
+            // 比不过的，往后找“大哥”
+            n++
         }
     }
-    // 清空剩余 左 右
+
+    while (i <= mid && j <= right) {
+        temp[k++] = if (nums[i] <= nums[j]) nums[i++] else nums[j++]
+    }
+
     while (i <= mid) temp[k++] = nums[i++]
     while (j <= right) temp[k++] = nums[j++]
     System.arraycopy(temp, 0, nums, left, temp.size)
     return counter
-}
-
-fun reversePairs(nums: IntArray): Int {
-    return mergeSort(nums, 0, nums.size - 1)
 }
