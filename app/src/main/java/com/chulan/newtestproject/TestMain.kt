@@ -337,10 +337,6 @@ class BloomFilter(var n: Int, var m: Int) {
 }
 
 
-fun reversePairs(nums: IntArray): Int {
-    return mergeSort(nums, 0, nums.size - 1)
-}
-
 fun mergeSort(nums: IntArray, left: Int, right: Int): Int {
     if (left >= right) return 0
     val mid = left + (right - left).shr(1)
@@ -383,4 +379,41 @@ fun merge(nums: IntArray, left: Int, mid: Int, right: Int): Int {
     while (j <= right) temp[k++] = nums[j++]
     System.arraycopy(temp, 0, nums, left, temp.size)
     return counter
+}
+
+fun reversePairs(nums: IntArray): Int {
+    return mergeSort(nums, 0, nums.size - 1)
+}
+
+fun sortArray(nums: IntArray): IntArray {
+    // 快速排序
+    quickSort(nums, 0, nums.size - 1)
+    return nums
+}
+
+fun quickSort(nums: IntArray, left: Int, right: Int) {
+    if (right <= left) return
+    var slow = 0
+    val pivot = right
+    // sort this piece
+    for (i in left until pivot) {
+        if (nums[i] <= nums[pivot]) {
+            // slow 始终停留在比pivot大的位置
+            if (i != slow) {
+                // change
+                nums[i] = nums[slow].apply {
+                    nums[slow] = nums[i]
+                }
+            }
+            slow++
+        }
+    }
+    nums[pivot] = nums[slow].apply {
+        nums[slow] = nums[pivot]
+    }
+
+    // sort left
+    quickSort(nums, left, slow - 1)
+    // sort right
+    quickSort(nums, slow + 1, right)
 }
