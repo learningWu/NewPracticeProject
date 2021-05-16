@@ -6,4 +6,5 @@
     <string name="flip_book">翻书动效</string>
     <string name="scalable_image">放大缩放图片</string>
     <string name="multi_pointer_control_image">多点触控</string>
+    <string name="view_pager">ViewPager</string>
 </resources>

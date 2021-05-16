@@ -41,12 +41,18 @@ class MainActivity : AppCompatActivity() {
         addItem(getString(R.string.multi_pointer_control_image)) {
             startActivity<MultiPointerControlActivity>()
         }
+        addItem(getString(R.string.view_pager)) {
+            startActivity<ViewPagerActivity>()
+        }
     }
 
     private fun addItem(title: String, block: () -> Unit) {
         llContainer.addView(TextView(this).apply {
             text = title
-            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
             setPadding(10f.dp2pxInt())
             setOnClickListener {
                 block()
