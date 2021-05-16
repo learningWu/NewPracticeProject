@@ -10,22 +10,23 @@ fun main() {
 //    array[2] = charArrayOf('1', '1', '0', '0', '0')
 //    array[3] = charArrayOf('0', '0', '0', '0', '0')
 //    numIslands(array)
-    val bloomFilter = BloomFilter(3, 1024)
-    bloomFilter.add(360)
-    if (bloomFilter.contains(360)) {
-        print("有360")
-    }
-    if (bloomFilter.contains(361)) {
-        print("有361")
-    } else {
-        print("没有361 ")
-    }
-    bloomFilter.clear()
-    if (bloomFilter.contains(360)) {
-        print("有360")
-    } else {
-        print("没有360")
-    }
+//    val bloomFilter = BloomFilter(3, 1024)
+//    bloomFilter.add(360)
+//    if (bloomFilter.contains(360)) {
+//        print("有360")
+//    }
+//    if (bloomFilter.contains(361)) {
+//        print("有361")
+//    } else {
+//        print("没有361 ")
+//    }
+//    bloomFilter.clear()
+//    if (bloomFilter.contains(360)) {
+//        print("有360")
+//    } else {
+//        print("没有360")
+//    }
+    minDistance("horse","ros")
 }
 
 internal class Trie
@@ -355,24 +356,15 @@ fun merge(nums: IntArray, left: Int, mid: Int, right: Int): Int {
     val temp = IntArray(right - left + 1)
     var k = 0
 
-    var n = left
-    var m = mid + 1
-
-    // 计算 重要翻转对
-    while (n <= mid && m <= right) {
-        // 左右两个区域
-        if (nums[n].toLong() / 2f > nums[m].toLong()) {
-            // 左边比得过的，全员累计 ( 每一个都能和 nums[m] “组队”，nums[m]组过队了，右边往后)
-            counter += (mid - n + 1)
-            m++
-        } else {
-            // 比不过的，往后找“大哥”
-            n++
-        }
-    }
-
     while (i <= mid && j <= right) {
-        temp[k++] = if (nums[i] <= nums[j]) nums[i++] else nums[j++]
+        temp[k++] = if (nums[i] <= nums[j]) {
+            nums[i++]
+        } else {
+            // 都是比你[j]大的数 i..mid
+            counter += mid - i + 1
+            // 找大哥继续和他们[i..mid]比
+            nums[j++]
+        }
     }
 
     while (i <= mid) temp[k++] = nums[i++]
@@ -393,12 +385,10 @@ fun sortArray(nums: IntArray): IntArray {
 
 fun quickSort(nums: IntArray, left: Int, right: Int) {
     if (right <= left) return
-    var slow = 0
+    var slow = left
     val pivot = right
-    // sort this piece
     for (i in left until pivot) {
         if (nums[i] <= nums[pivot]) {
-            // slow 始终停留在比pivot大的位置
             if (i != slow) {
                 // change
                 nums[i] = nums[slow].apply {
@@ -412,8 +402,33 @@ fun quickSort(nums: IntArray, left: Int, right: Int) {
         nums[slow] = nums[pivot]
     }
 
-    // sort left
     quickSort(nums, left, slow - 1)
-    // sort right
     quickSort(nums, slow + 1, right)
+}
+
+fun minDistance(word1: String, word2: String): Int {
+    val newWord1 = " $word1"
+    val newWord2 = " $word2"
+    val row = newWord1.length
+    val col = newWord2.length
+    if (row == 0) return col
+    if (col == 0) return row
+    if (word1 == word2) return 0
+    val matrix = Array(row) { IntArray(col) }
+    for (i in 0 until row) {
+        matrix[i][0] = i
+    }
+    for (i in 0 until col) {
+        matrix[0][i] = i
+    }
+
+    for (i in 1 until row)
+        for (j in 1 until col) {
+            if (newWord1[i] == newWord2[j]) {
+                matrix[i][j] = matrix[i - 1][j - 1]
+            } else {
+                matrix[i][j] = arrayOf(matrix[i - 1][j - 1], matrix[i - 1][j], matrix[i][j - 1]).min()!! + 1
+            }
+        }
+    return matrix[row - 1][col - 1]
 }
