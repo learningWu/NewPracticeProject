@@ -26,7 +26,7 @@ fun main() {
 //    } else {
 //        print("没有360")
 //    }
-    minDistance("horse","ros")
+    longestCommonSubsequence("horse", "ros")
 }
 
 internal class Trie
@@ -204,8 +204,8 @@ fun numIslands(grid: Array<CharArray>): Int {
                     if (xForward in grid.indices && yForward in grid[i].indices && grid[xForward][yForward] == '1') {
                         //相同集合，合并
                         uf.union(
-                                matrix2FlatPoi(i, j, grid[i].size),
-                                matrix2FlatPoi(xForward, yForward, grid[i].size)
+                            matrix2FlatPoi(i, j, grid[i].size),
+                            matrix2FlatPoi(xForward, yForward, grid[i].size)
                         )
                     }
                 }
@@ -427,8 +427,26 @@ fun minDistance(word1: String, word2: String): Int {
             if (newWord1[i] == newWord2[j]) {
                 matrix[i][j] = matrix[i - 1][j - 1]
             } else {
-                matrix[i][j] = arrayOf(matrix[i - 1][j - 1], matrix[i - 1][j], matrix[i][j - 1]).min()!! + 1
+                matrix[i][j] =
+                    arrayOf(matrix[i - 1][j - 1], matrix[i - 1][j], matrix[i][j - 1]).min()!! + 1
             }
         }
     return matrix[row - 1][col - 1]
+}
+
+fun longestCommonSubsequence(text1: String, text2: String): Int {
+    val m = text1.length + 1
+    val n = text2.length + 1
+    val dp = Array(m) { IntArray(n) }
+    for (i in 1 until m)
+        for (j in 1 until n) {
+            if (text1[i - 1] == text2[j - 1]) {
+                // 相等时，为 各减去一个字符 情况 + 1
+                dp[i][j] = dp[i - 1][j - 1] + 1
+            } else {
+                // 不相等时，2种情况最大值：1. test1减一个 2. test2减一个 (同时减一个 已经被包含在前两种情况之中)
+                dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1])
+            }
+        }
+    return dp[m - 1][n - 1]
 }
