@@ -18,3 +18,9 @@
 `手势操作` `双指放缩`  
   
 ![](https://github.com/learningWu/NewPracticeProject/blob/main/show_photo/scalable_image.gif)
+
+## ViewPager分页
+  
+`手势操作` `滑动处理` `手指速度处理`  
+  
+![](https://github.com/learningWu/NewPracticeProject/blob/main/show_photo/ViewPager.gif)
