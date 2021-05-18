@@ -1,62 +1,100 @@
 package com.chulan.newtestproject
 
-import android.app.ActionBar
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.MaterialTheme.typography
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.AlignmentLine
+import androidx.compose.ui.layout.FirstBaseline
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.core.view.setPadding
 import com.chulan.newtestproject.activity.*
 import com.chulan.newtestproject.ext.startActivity
-import com.chulan.newtestproject.util.dp2px
 import com.chulan.newtestproject.util.dp2pxInt
 
-class MainActivity : AppCompatActivity() {
-    lateinit var llContainer: ViewGroup
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        initView()
+        setContent {
+            Content()
+        }
     }
 
-    private fun initView() {
-        llContainer = findViewById(R.id.llContainer)
-
-        addItem(getString(R.string.avatar_text)) {
+    @Composable
+    private fun Content() = Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .padding(16.dp)
+            .width(IntrinsicSize.Max)
+            .verticalScroll(rememberScrollState())
+    ) {
+        ActionButton(
+            getString(R.string.avatar_text),
+        ) {
             startActivity<AvatarActivity>()
         }
-        addItem(getString(R.string.clock_text)) {
+
+        ActionButton(
+            getString(R.string.clock_text),
+        ) {
             startActivity<ClockActivity>()
         }
-        addItem(getString(R.string.tag_layout_text)) {
+
+        ActionButton(
+            getString(R.string.tag_layout_text),
+        ) {
             startActivity<TagLayoutActivity>()
         }
-        addItem(getString(R.string.flip_book)) {
+
+        ActionButton(
+            getString(R.string.flip_book),
+        ) {
             startActivity<FlipActivity>()
         }
-        addItem(getString(R.string.scalable_image)) {
+
+        ActionButton(
+            getString(R.string.scalable_image),
+        ) {
             startActivity<ScalableImageViewActivity>()
         }
-        addItem(getString(R.string.multi_pointer_control_image)) {
+
+        ActionButton(getString(R.string.multi_pointer_control_image)) {
             startActivity<MultiPointerControlActivity>()
         }
-        addItem(getString(R.string.view_pager)) {
+
+        ActionButton(getString(R.string.view_pager)) {
             startActivity<ViewPagerActivity>()
         }
     }
 
-    private fun addItem(title: String, block: () -> Unit) {
-        llContainer.addView(TextView(this).apply {
-            text = title
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-            setPadding(10f.dp2pxInt())
-            setOnClickListener {
-                block()
-            }
-        })
-    }
+    @Composable
+    private fun ActionButton(content: String, onClick: () -> Unit) = TextButton(
+        colors = ButtonDefaults.textButtonColors(contentColor = Color(0xffffffff)),
+        onClick = onClick,
+        modifier = Modifier
+            .padding(10.dp)
+            .wrapContentHeight()
+            .fillMaxWidth(0.8f)
+            .background(Color(0x81ff6600))
+            .clip(shape = RoundedCornerShape(8.dp)),
+        content = { Text(content) }
+    )
 }

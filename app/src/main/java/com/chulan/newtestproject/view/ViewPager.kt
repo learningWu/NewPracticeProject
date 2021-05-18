@@ -81,7 +81,7 @@ class ViewPager @JvmOverloads constructor(
             }
             MotionEvent.ACTION_MOVE -> {
                 val dx = downScroll.x - (event.x - downPointF.x)
-                if (dx in 0..width)
+                if (dx >= 0 && dx <= width)
                     scrollTo(dx.toInt(), 0)
             }
             MotionEvent.ACTION_UP -> {
