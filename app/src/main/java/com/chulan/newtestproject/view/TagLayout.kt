@@ -24,6 +24,7 @@ class TagLayout @JvmOverloads constructor(
         for (i in 0 until childCount) {
             // 计算宽度
             getChildAt(i).apply {
+                // 父布局测量规格 + 子布局 LayoutParam = 子布局的测量规格  =》应用 child.measure
                 measureChildWithMargins(this, widthMeasureSpec, 0, heightMeasureSpec, 0)
 //                val childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
 //                        0, layoutParams.width)
