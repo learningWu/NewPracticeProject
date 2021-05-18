@@ -440,13 +440,43 @@ fun longestCommonSubsequence(text1: String, text2: String): Int {
     val dp = Array(m) { IntArray(n) }
     for (i in 1 until m)
         for (j in 1 until n) {
-            if (text1[i - 1] == text2[j - 1]) {
-                // 相等时，为 各减去一个字符 情况 + 1
-                dp[i][j] = dp[i - 1][j - 1] + 1
+            dp[i][j] = if (text1[i - 1] == text2[j - 1]) {
+                dp[i - 1][j - 1] + 1
             } else {
-                // 不相等时，2种情况最大值：1. test1减一个 2. test2减一个 (同时减一个 已经被包含在前两种情况之中)
-                dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1])
+                Math.max(dp[i - 1][j], dp[i][j - 1])
             }
         }
     return dp[m - 1][n - 1]
+}
+
+fun longestPalindrome(s: String): String {
+    // 中心扩展法 1. 遍历每个字符 2. 向两侧扩展，相同字符即 +1 ; 否则遍历下一个字符
+    if (s.length < 2) return s
+    var result: CharSequence = ""
+    var temp: CharSequence = ""
+    for (i in s.indices) {
+        // 中心点 选取 i 和 i+1 两个字符的空隙
+        temp = queryMaxPalindrome(s, i, i + 1)
+        if (temp.length > result.length) {
+            result = temp
+        }
+        // 中心点 选取当前字符 i
+        temp = queryMaxPalindrome(s, i - 1, i + 1)
+        if (temp.length > result.length) {
+            result = temp
+        }
+    }
+    return if (result.isEmpty()) s[0].toString() else result.toString()
+}
+
+fun queryMaxPalindrome(s: String, left: Int, right: Int): CharSequence {
+    var result: CharSequence = ""
+    var l = left
+    var r = right
+    while (l in s.indices && r in s.indices && s[l] == s[r]) {
+        result = s.subSequence(l, r + 1)
+        l--
+        r++
+    }
+    return result
 }
