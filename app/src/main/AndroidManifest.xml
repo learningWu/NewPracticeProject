@@ -31,6 +31,8 @@
             android:label="@string/multi_pointer_control_image"/>
         <activity android:name=".activity.ViewPagerActivity"
             android:label="@string/view_pager"/>
+        <activity android:name=".activity.DragLayoutActivity"
+            android:label="@string/drag_layout"/>
     </application>
 
 </manifest>

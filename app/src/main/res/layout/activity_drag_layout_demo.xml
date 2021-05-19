@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.chulan.newtestproject.view.drag.DragLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tvContent"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:contentDescription="哈哈哈"
+        android:text="文本"
+        android:textColor="@color/red"
+        android:background="@color/gray_9b9b9b"
+        android:textSize="40sp"
+        android:gravity="center"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/vRect"
+        android:layout_width="100dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_height="100dp"
+        android:contentDescription="假装图片"
+        android:background="@color/green"/>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/targetLayout"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="@color/gray_9b9b9b"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"/>
+
+</com.chulan.newtestproject.view.drag.DragLayout>

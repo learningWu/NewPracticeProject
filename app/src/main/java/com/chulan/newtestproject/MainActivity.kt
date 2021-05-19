@@ -1,8 +1,6 @@
 package com.chulan.newtestproject
 
 import android.os.Bundle
-import android.view.ViewGroup
-import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -11,23 +9,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.MaterialTheme.typography
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.AlignmentLine
-import androidx.compose.ui.layout.FirstBaseline
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.core.view.setPadding
 import com.chulan.newtestproject.activity.*
 import com.chulan.newtestproject.ext.startActivity
-import com.chulan.newtestproject.util.dp2pxInt
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,6 +72,10 @@ class MainActivity : ComponentActivity() {
 
         ActionButton(getString(R.string.view_pager)) {
             startActivity<ViewPagerActivity>()
+        }
+
+        ActionButton(getString(R.string.drag_layout)) {
+            startActivity<DragLayoutActivity>()
         }
     }
 
