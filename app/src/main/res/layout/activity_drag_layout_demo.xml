@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.chulan.newtestproject.view.drag.DragLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.chulan.newtestproject.view.drag.DragUpDownLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_margin="20dp">
 
     <TextView
         android:id="@+id/tvContent"
@@ -12,8 +13,10 @@
         android:text="文本"
         android:textColor="@color/red"
         android:background="@color/gray_9b9b9b"
+        android:layout_marginTop="100dp"
         android:textSize="40sp"
         android:gravity="center"
+        android:clickable="true"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -34,4 +37,4 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"/>
 
-</com.chulan.newtestproject.view.drag.DragLayout>
+</com.chulan.newtestproject.view.drag.DragUpDownLayout>

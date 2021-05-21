@@ -450,6 +450,15 @@ fun longestCommonSubsequence(text1: String, text2: String): Int {
 }
 
 
-//fun longestPalindrome(s: String): String {
-//    // 动态规划
-//}
+fun longestPalindrome(s: String): String {
+    val dp = Array(s.length) { BooleanArray(s.length) }
+    var res = ""
+    for (i in s.length - 1 downTo 0)
+        for (j in i until s.length - 1) {
+            dp[i][j] = s[i] == s[j] && (j - i > 2 || dp[i + 1][j - 1])
+            if (dp[i][j] && j - i + 1 > res.length) {
+                res = s.substring(i, j + 1)
+            }
+        }
+    return res
+}

@@ -18,7 +18,7 @@ import com.chulan.newtestproject.ext.toast
  * Created by wuzixuan on 2021/5/19
  * 使用 DragListener ：拖拽时出现透明“像素”View
  */
-class DragLayout @JvmOverloads constructor(
+class DragCollectLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
