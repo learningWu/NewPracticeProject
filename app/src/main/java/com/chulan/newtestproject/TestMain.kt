@@ -337,75 +337,6 @@ class BloomFilter(var n: Int, var m: Int) {
     }
 }
 
-
-fun mergeSort(nums: IntArray, left: Int, right: Int): Int {
-    if (left >= right) return 0
-    val mid = left + (right - left).shr(1)
-    // order left
-    val leftCount = mergeSort(nums, left, mid)
-    // order right
-    val rightCount = mergeSort(nums, mid + 1, right)
-    // merge left and right
-    return leftCount + rightCount + merge(nums, left, mid, right)
-}
-
-fun merge(nums: IntArray, left: Int, mid: Int, right: Int): Int {
-    var counter = 0
-    var i = left
-    var j = mid + 1
-    val temp = IntArray(right - left + 1)
-    var k = 0
-
-    while (i <= mid && j <= right) {
-        temp[k++] = if (nums[i] <= nums[j]) {
-            nums[i++]
-        } else {
-            // 都是比你[j]大的数 i..mid
-            counter += mid - i + 1
-            // 找大哥继续和他们[i..mid]比
-            nums[j++]
-        }
-    }
-
-    while (i <= mid) temp[k++] = nums[i++]
-    while (j <= right) temp[k++] = nums[j++]
-    System.arraycopy(temp, 0, nums, left, temp.size)
-    return counter
-}
-
-fun reversePairs(nums: IntArray): Int {
-    return mergeSort(nums, 0, nums.size - 1)
-}
-
-fun sortArray(nums: IntArray): IntArray {
-    // 快速排序
-    quickSort(nums, 0, nums.size - 1)
-    return nums
-}
-
-fun quickSort(nums: IntArray, left: Int, right: Int) {
-    if (right <= left) return
-    var slow = left
-    val pivot = right
-    for (i in left until pivot) {
-        if (nums[i] <= nums[pivot]) {
-            if (i != slow) {
-                // change
-                nums[i] = nums[slow].apply {
-                    nums[slow] = nums[i]
-                }
-            }
-            slow++
-        }
-    }
-    nums[pivot] = nums[slow].apply {
-        nums[slow] = nums[pivot]
-    }
-
-    quickSort(nums, left, slow - 1)
-    quickSort(nums, slow + 1, right)
-}
-
 fun minDistance(word1: String, word2: String): Int {
     val newWord1 = " $word1"
     val newWord2 = " $word2"
@@ -461,4 +392,33 @@ fun longestPalindrome(s: String): String {
             }
         }
     return res
+}
+
+fun sortArray(nums: IntArray): IntArray {
+    quickSort(nums, 0, nums.size - 1)
+    return nums
+}
+
+fun quickSort(nums: IntArray, left: Int, right: Int) {
+    if (right <= left) return
+    var pivot = right
+    var slow = left
+    for (i in left until pivot) {
+        if (nums[i] < nums[pivot]) {
+            if (i != slow) {
+                nums[i] = nums[slow].apply {
+                    nums[slow] = nums[i]
+                }
+            }
+            slow++
+        }
+    }
+    nums[pivot] = nums[slow].apply {
+        nums[slow] = nums[pivot]
+    }
+    pivot = slow
+
+    // 重复左右两边
+    quickSort(nums, left, pivot - 1)
+    quickSort(nums, pivot + 1, right)
 }
