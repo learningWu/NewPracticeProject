@@ -77,6 +77,10 @@ class MainActivity : ComponentActivity() {
         ActionButton(getString(R.string.drag_layout)) {
             startActivity<DragLayoutActivity>()
         }
+
+        ActionButton(getString(R.string.nested_view)) {
+            startActivity<NestedActivity>()
+        }
     }
 
     @Composable

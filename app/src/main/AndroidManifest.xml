@@ -33,6 +33,8 @@
             android:label="@string/view_pager"/>
         <activity android:name=".activity.DragLayoutActivity"
             android:label="@string/drag_layout"/>
+        <activity android:name=".activity.NestedActivity"
+            android:label="@string/nested_view"/>
     </application>
 
 </manifest>
