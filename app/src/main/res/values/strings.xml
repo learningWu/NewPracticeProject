@@ -7,6 +7,7 @@
     <string name="scalable_image">放大缩放图片</string>
     <string name="multi_pointer_control_image">多点触控</string>
     <string name="view_pager">ViewPager</string>
-    <string name="drag_layout">拖拽之DragListener</string>
+    <string name="drag_layout">拖拽</string>
+    <string name="nested_view">嵌套滑动</string>
     <string name="compose_practice">compose 练习</string>
 </resources>

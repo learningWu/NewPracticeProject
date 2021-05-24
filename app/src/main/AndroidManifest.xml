@@ -35,6 +35,8 @@
             android:label="@string/drag_layout"/>
         <activity android:name=".compose.ComposePracticeActivity"
             android:label="@string/drag_layout"/>
+        <activity android:name=".activity.NestedActivity"
+            android:label="@string/nested_view"/>
     </application>
 
 </manifest>

@@ -80,6 +80,10 @@ class MainActivity : ComponentActivity() {
             startActivity<DragLayoutActivity>()
         }
 
+        ActionButton(getString(R.string.nested_view)) {
+            startActivity<NestedActivity>()
+        }
+
         ActionButton(getString(R.string.compose_practice)) {
             startActivity<ComposePracticeActivity>()
         }
