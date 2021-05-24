@@ -15,8 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.chulan.newtestproject.activity.*
+import com.chulan.newtestproject.compose.ComposePracticeActivity
 import com.chulan.newtestproject.ext.startActivity
 
 class MainActivity : ComponentActivity() {
@@ -77,18 +79,24 @@ class MainActivity : ComponentActivity() {
         ActionButton(getString(R.string.drag_layout)) {
             startActivity<DragLayoutActivity>()
         }
+
+        ActionButton(getString(R.string.compose_practice)) {
+            startActivity<ComposePracticeActivity>()
+        }
     }
 
     @Composable
-    private fun ActionButton(content: String, onClick: () -> Unit) = TextButton(
-        colors = ButtonDefaults.textButtonColors(contentColor = Color(0xffffffff)),
-        onClick = onClick,
-        modifier = Modifier
-            .padding(10.dp)
-            .wrapContentHeight()
-            .fillMaxWidth(0.8f)
-            .background(Color(0x81ff6600))
-            .clip(shape = RoundedCornerShape(8.dp)),
-        content = { Text(content) }
-    )
+    private fun ActionButton(content: String, onClick: () -> Unit) {
+        TextButton(
+            colors = ButtonDefaults.textButtonColors(contentColor = Color(0xffffffff)),
+            onClick = onClick,
+            modifier = Modifier
+                .padding(10.dp)
+                .wrapContentHeight()
+                .fillMaxWidth(0.8f)
+                .background(Color(0x81ff6600))
+                .clip(shape = RoundedCornerShape(8.dp)),
+            content = { Text(content) }
+        )
+    }
 }

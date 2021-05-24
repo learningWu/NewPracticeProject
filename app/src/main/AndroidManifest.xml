@@ -33,6 +33,8 @@
             android:label="@string/view_pager"/>
         <activity android:name=".activity.DragLayoutActivity"
             android:label="@string/drag_layout"/>
+        <activity android:name=".compose.ComposePracticeActivity"
+            android:label="@string/drag_layout"/>
     </application>
 
 </manifest>
