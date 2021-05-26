@@ -26,7 +26,7 @@ fun main() {
 //    } else {
 //        print("没有360")
 //    }
-    longestCommonSubsequence("horse", "ros")
+    minDistance("a", "ab")
 }
 
 internal class Trie
@@ -337,63 +337,6 @@ class BloomFilter(var n: Int, var m: Int) {
     }
 }
 
-fun minDistance(word1: String, word2: String): Int {
-    val newWord1 = " $word1"
-    val newWord2 = " $word2"
-    val row = newWord1.length
-    val col = newWord2.length
-    if (row == 0) return col
-    if (col == 0) return row
-    if (word1 == word2) return 0
-    val matrix = Array(row) { IntArray(col) }
-    for (i in 0 until row) {
-        matrix[i][0] = i
-    }
-    for (i in 0 until col) {
-        matrix[0][i] = i
-    }
-
-    for (i in 1 until row)
-        for (j in 1 until col) {
-            if (newWord1[i] == newWord2[j]) {
-                matrix[i][j] = matrix[i - 1][j - 1]
-            } else {
-                matrix[i][j] =
-                    arrayOf(matrix[i - 1][j - 1], matrix[i - 1][j], matrix[i][j - 1]).min()!! + 1
-            }
-        }
-    return matrix[row - 1][col - 1]
-}
-
-fun longestCommonSubsequence(text1: String, text2: String): Int {
-    val m = text1.length + 1
-    val n = text2.length + 1
-    val dp = Array(m) { IntArray(n) }
-    for (i in 1 until m)
-        for (j in 1 until n) {
-            dp[i][j] = if (text1[i - 1] == text2[j - 1]) {
-                dp[i - 1][j - 1] + 1
-            } else {
-                Math.max(dp[i - 1][j], dp[i][j - 1])
-            }
-        }
-    return dp[m - 1][n - 1]
-}
-
-
-fun longestPalindrome(s: String): String {
-    val dp = Array(s.length) { BooleanArray(s.length) }
-    var res = ""
-    for (i in s.length - 1 downTo 0)
-        for (j in i until s.length - 1) {
-            dp[i][j] = s[i] == s[j] && (j - i > 2 || dp[i + 1][j - 1])
-            if (dp[i][j] && j - i + 1 > res.length) {
-                res = s.substring(i, j + 1)
-            }
-        }
-    return res
-}
-
 fun sortArray(nums: IntArray): IntArray {
     quickSort(nums, 0, nums.size - 1)
     return nums
@@ -421,4 +364,65 @@ fun quickSort(nums: IntArray, left: Int, right: Int) {
     // 重复左右两边
     quickSort(nums, left, pivot - 1)
     quickSort(nums, pivot + 1, right)
+}
+
+fun longestCommonSubsequence(text1: String, text2: String): Int {
+    val m = text1.length + 1
+    val n = text2.length + 1
+    val dp = Array(m) { IntArray(n) }
+    for (i in 1 until m)
+        for (j in 1 until n) {
+            if (text1[i - 1] == text2[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1] + 1
+            } else {
+                dp[i][j] = arrayOf(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]).maxOrNull()!!
+            }
+        }
+    return dp[m - 1][n - 1]
+}
+
+fun longestPalindrome(s: String): String {
+    // 从后往前循环的原因：起终点i,j 元素相等 => dp[i][j] = dp[i+1][j-1]是回文 ，所以要先已知大于当前 i 的循环结果。从前往后的循环是无法得到这种推论
+    // i,j为
+    val dp = Array(s.length) { BooleanArray(s.length) }
+    var res = ""
+    for (i in s.length - 1 downTo 0)
+        for (j in i until s.length - 1) {
+            dp[i][j] = s[i] == s[j] && (j - i < 1 || dp[i + 1][j - 1])
+            if (dp[i][j] && j - i + 1 > res.length) {
+                res = s.substring(i, j + 1)
+            }
+        }
+    return res
+}
+
+fun minDistance(word1: String, word2: String): Int {
+    if (word1.isEmpty()) return word2.length
+    if (word2.isEmpty()) return word1.length
+    // 二维dp
+    // 二维矩阵的两条边
+    // "" 和 word2 => 0..word2.length
+    // word1 和 "" => 0..word1.length
+    val m = word1.length + 1
+    val n = word2.length + 1
+    val dp = Array(m) { IntArray(n) }
+    // 初始化两条边
+//    for (i in 0 until m) dp[i][0] = i
+//    for (j in 0 until n) dp[0][j] = j
+    for (i in 1 until m) {
+        dp[i][0] = i
+        for (j in 1 until n) {
+            dp[0][j] = j
+            if (word1[i - 1] == word2[j - 1]) {
+                // 元素相等时，无须编辑
+                dp[i][j] = dp[i - 1][j - 1]
+            } else {
+                // 元素不相等时
+                // 删除任一字符串字符 : dp[i - 1][j], dp[i][j - 1]
+                // 或 替换 : dp[i - 1][j - 1]
+                dp[i][j] = arrayOf(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]).min()!! + 1
+            }
+        }
+    }
+    return dp[m - 1][n - 1]
 }
