@@ -426,3 +426,76 @@ fun minDistance(word1: String, word2: String): Int {
     }
     return dp[m - 1][n - 1]
 }
+
+fun firstUniqChar(s: String): Int {
+    val arr = IntArray(26)
+    for (c in s) arr[c - 'a']++
+    for (i in s.indices) {
+        if (arr[s[i] - 'a'] == 1) {
+            return i
+        }
+    }
+    return -1
+}
+
+fun myAtoi(s: String): Int {
+    var res = 0L
+    var startCompute = false
+    var isNegative = false
+    loop@ for (i in s.indices) {
+        if (startCompute && s[i] !in '0'..'9') break
+        when (s[i]) {
+            '-' -> {
+                isNegative = true
+                startCompute = true
+            }
+            '+' -> {
+                isNegative = false
+                startCompute = true
+            }
+            ' ' -> {
+                continue@loop
+            }
+            in '0'..'9' -> {
+                startCompute = true
+                // 数值类型
+                res = s[i] - '0' + res * 10
+                // 越界时直接中断遍历
+                if (isNegative && -res < Int.MIN_VALUE || (!isNegative && res > Int.MAX_VALUE)) break
+            }
+            else -> break@loop
+        }
+    }
+    return if (isNegative) Math.max(-res, Int.MIN_VALUE.toLong()).toInt() else Math.min(
+        res,
+        Int.MAX_VALUE.toLong()
+    ).toInt()
+}
+
+fun reverseStr(s: String, k: Int): String {
+    // 1.k 个反转 k 个停止反转
+    // 2. 2k 周期后，如果下轮周期不够2k  => a.大于 k ，反转 k 个   b.小于 k，全部反转
+    val array = s.toCharArray()
+    var reverseStart = 0
+    var reverseEnd = 0
+    while (reverseStart in array.indices) {
+        reverseEnd = Math.min(reverseStart + k - 1, array.size - 1)
+
+        reverse(array, reverseStart, reverseEnd)
+
+        reverseStart += 2 * k
+    }
+    return String(array)
+}
+
+fun reverse(s: CharArray, left: Int, right: Int) {
+    var i = left
+    var j = right
+    while (i < j) {
+        s[i] = s[j].apply {
+            s[j] = s[i]
+        }
+        i++
+        j--
+    }
+}
