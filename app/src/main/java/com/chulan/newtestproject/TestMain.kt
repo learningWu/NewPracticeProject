@@ -1,5 +1,6 @@
 package com.chulan.newtestproject
 
+import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.HashSet
 
@@ -26,7 +27,7 @@ fun main() {
 //    } else {
 //        print("没有360")
 //    }
-    minDistance("a", "ab")
+    reverseStr("abcdefg", 2)
 }
 
 internal class Trie
@@ -428,74 +429,100 @@ fun minDistance(word1: String, word2: String): Int {
 }
 
 fun firstUniqChar(s: String): Int {
-    val arr = IntArray(26)
-    for (c in s) arr[c - 'a']++
-    for (i in s.indices) {
-        if (arr[s[i] - 'a'] == 1) {
+    val counter = IntArray(26)
+    for (c in s) counter[c - 'a']++
+    for (i in s.indices)
+        if (counter[s[i] - 'a'] == 1)
             return i
-        }
-    }
     return -1
 }
 
 fun myAtoi(s: String): Int {
     var res = 0L
     var startCompute = false
-    var isNegative = false
-    loop@ for (i in s.indices) {
-        if (startCompute && s[i] !in '0'..'9') break
-        when (s[i]) {
-            '-' -> {
-                isNegative = true
+    var isNega = false
+    loop@ for (c in s) {
+        if (startCompute && !Character.isDigit(c)) {
+            break
+        }
+        when (c) {
+            '+', '-' -> {
                 startCompute = true
+                if (c == '-') isNega = true
             }
-            '+' -> {
-                isNegative = false
-                startCompute = true
-            }
-            ' ' -> {
-                continue@loop
-            }
+            ' ' -> continue@loop
             in '0'..'9' -> {
                 startCompute = true
-                // 数值类型
-                res = s[i] - '0' + res * 10
-                // 越界时直接中断遍历
-                if (isNegative && -res < Int.MIN_VALUE || (!isNegative && res > Int.MAX_VALUE)) break
+                res = res * 10 + (c - '0')
+                val stopCompute = isNega && -res < Int.MIN_VALUE || (!isNega && res > Int.MAX_VALUE)
+                if (stopCompute) break@loop
             }
             else -> break@loop
         }
     }
-    return if (isNegative) Math.max(-res, Int.MIN_VALUE.toLong()).toInt() else Math.min(
-        res,
-        Int.MAX_VALUE.toLong()
-    ).toInt()
+    return if (isNega) {
+        Math.max(Int.MIN_VALUE.toLong(), -res).toInt()
+    } else {
+        Math.min(Int.MAX_VALUE.toLong(), res).toInt()
+    }
 }
 
 fun reverseStr(s: String, k: Int): String {
-    // 1.k 个反转 k 个停止反转
-    // 2. 2k 周期后，如果下轮周期不够2k  => a.大于 k ，反转 k 个   b.小于 k，全部反转
     val array = s.toCharArray()
     var reverseStart = 0
-    var reverseEnd = 0
-    while (reverseStart in array.indices) {
-        reverseEnd = Math.min(reverseStart + k - 1, array.size - 1)
-
-        reverse(array, reverseStart, reverseEnd)
-
+    while (reverseStart < array.size) {
+        reverse(array, reverseStart, Math.min(reverseStart + k - 1, array.size - 1))
         reverseStart += 2 * k
     }
     return String(array)
 }
 
-fun reverse(s: CharArray, left: Int, right: Int) {
-    var i = left
-    var j = right
+fun reverse(charArray: CharArray, start: Int, end: Int) {
+    var i = start
+    var j = end
     while (i < j) {
-        s[i] = s[j].apply {
-            s[j] = s[i]
+        charArray[i] = charArray[j].apply {
+            charArray[j] = charArray[i]
         }
         i++
         j--
     }
+}
+
+fun reverseWords(s: String): String {
+    val res = StringBuilder()
+    val word = StringBuilder()
+    for (i in s.indices) {
+        if (s[i] != ' ') {
+            word.insert(0, s[i])
+        }
+
+        if (s[i] == ' ' || i == s.length - 1) {
+            res.append(if (res.isEmpty()) word else " $word")
+            word.clear()
+        }
+    }
+    return res.toString()
+}
+
+fun reverseOnlyLetters(s: String): String {
+    var left = 0
+    var right = s.length - 1
+    val array = s.toCharArray()
+    while (left < right) {
+        if (!array[left].isLetter()) {
+            left++
+            continue
+        }
+        if (!array[right].isLetter()) {
+            right--
+            continue
+        }
+        array[left] = array[right].apply {
+            array[right] = array[left]
+        }
+        left++
+        right--
+    }
+    return String(array)
 }
