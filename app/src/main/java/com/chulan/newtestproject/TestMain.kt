@@ -2,6 +2,7 @@ package com.chulan.newtestproject
 
 import java.lang.StringBuilder
 import java.util.*
+import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 fun main() {
@@ -27,7 +28,7 @@ fun main() {
 //    } else {
 //        print("没有360")
 //    }
-    reverseStr("abcdefg", 2)
+    findAnagrams("cbaebabacd", "abc")
 }
 
 internal class Trie
@@ -489,22 +490,6 @@ fun reverse(charArray: CharArray, start: Int, end: Int) {
     }
 }
 
-fun reverseWords(s: String): String {
-    val res = StringBuilder()
-    val word = StringBuilder()
-    for (i in s.indices) {
-        if (s[i] != ' ') {
-            word.insert(0, s[i])
-        }
-
-        if (s[i] == ' ' || i == s.length - 1) {
-            res.append(if (res.isEmpty()) word else " $word")
-            word.clear()
-        }
-    }
-    return res.toString()
-}
-
 fun reverseOnlyLetters(s: String): String {
     var left = 0
     var right = s.length - 1
@@ -525,4 +510,77 @@ fun reverseOnlyLetters(s: String): String {
         right--
     }
     return String(array)
+}
+
+fun reverseWords(s: String): String {
+    return s.split(" ").map { it.reversed() }.joinToString(" ")
+}
+
+fun findAnagrams(s: String, p: String): List<Int> {
+    //s: "cbaebabacd" p: "abc"
+    // 滑动窗口
+    var subStart = 0
+    val k = p.length
+    val result = LinkedList<Int>()
+    while (subStart + k - 1 < s.length) {
+        val sub = s.substring(subStart, subStart + k)
+        if (isDifferentPoiWord(sub, p)) {
+            result.add(subStart)
+        }
+        subStart++
+    }
+    return result
+}
+
+fun isDifferentPoiWord(s: String, p: String): Boolean {
+    if (s.length != p.length) return false
+    val array = IntArray(26)
+    for (i in s.indices) {
+        array[s[i] - 'a']++
+        array[p[i] - 'a']--
+    }
+    for (v in array) {
+        if (v != 0) return false
+    }
+    return true
+}
+
+var isSaved = false
+fun validPalindrome(s: String): Boolean {
+    var left = 0
+    var right = s.length - 1
+    while (left < right) {
+        if (s[left] != s[right]) {
+            if (!isSaved) {
+                // 抢救一下
+                isSaved = true
+                // 删除左边这个，中间这段是否回文
+                val leftRemovedSubValid = validPalindrome(s.substring(left + 1, right + 1))
+                // 删除右边这个，中间这段是否回文
+                val rightRemovedSubValid = validPalindrome(s.substring(left, right))
+                // 抢救结果
+                return leftRemovedSubValid || rightRemovedSubValid
+            } else {
+                return false
+            }
+        }
+        left++
+        right--
+    }
+    return true
+}
+
+fun isIsomorphic(s: String, t: String): Boolean {
+    val hashMap = HashMap<Char, Char>()
+    for (i in s.indices) {
+        if (hashMap.containsKey(s[i]) || hashMap.containsValue(t[i])) {
+            // 有新人想破坏关系
+            if (hashMap[s[i]] != t[i])
+                return false
+        } else {
+            // 建立关系
+            hashMap[s[i]] = t[i]
+        }
+    }
+    return true
 }
