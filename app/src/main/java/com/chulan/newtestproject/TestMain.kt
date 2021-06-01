@@ -28,7 +28,6 @@ fun main() {
 //    } else {
 //        print("没有360")
 //    }
-    isMatch("adceb", "*a*b")
 }
 
 internal class Trie
@@ -585,37 +584,22 @@ fun isIsomorphic(s: String, t: String): Boolean {
     return true
 }
 
-fun isMatch(s: String, p: String): Boolean {
-    // 二维dp 状态空间为 s[0..n] 和 p[0..m] 匹配
-    // 正常字母时  dp[i][j] = s[i] == p[j] && dp[i-1][j-1]
-    // s[i] 为 * 时 dp[i][0..n] = dp[i-1][0..n] || dp[i][j-1]
-    // s[i] 为 ? 时 dp[i][j] = dp[i-1][j-1]
-
-    val m = p.length + 1
-    val n = s.length + 1
-    val dp = Array(m) { BooleanArray(n) }
-    dp[0][0] = true
-    for (i in 1 until m)
-        for (j in 0 until n) {
-            when (p[i - 1]) {
-                '*' -> {
-                    if (j == 0) {
-                        dp[i][j] = dp[i - 1][j]
-                    } else {
-                        dp[i][j] = dp[i - 1][j] || dp[i][j - 1]
-                    }
-                }
-                '?' -> {
-                    if (j > 0) {
-                        dp[i][j] = dp[i - 1][j - 1]
-                    }
-                }
-                else -> {
-                    if (j > 0) {
-                        dp[i][j] = p[i - 1] == s[j - 1] && dp[i - 1][j - 1]
-                    }
-                }
-            }
+fun maxValue(n: String, x: Int): String {
+    val sb = StringBuilder(n)
+    var isNeg = false
+    for (i in sb.indices) {
+        if (sb[i] == '-') {
+            isNeg = true
+            continue
         }
-    return dp[m - 1][n - 1]
+        if (isNeg && x < sb[i] - '0' || (!isNeg && x > sb[i] - '0')) {
+            sb.insert(i, x)
+            return sb.toString()
+        }
+    }
+    return sb.append(x).toString()
 }
+
+//fun numDistinct(s: String, t: String): Int {
+//
+//}
