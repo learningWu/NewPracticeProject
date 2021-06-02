@@ -614,3 +614,35 @@ fun isIsomorphic(s: String, t: String): Boolean {
     }
     return true
 }
+
+fun longestValidParentheses(s: String): Int {
+    if (s.length <= 1) return 0
+    // dp[i]:以i字符结尾的子串，符合条件的长度
+    // 其实还是枚举了以 i 为结尾的子串，只是中间结果很多可以由动态规划推断过来，减少计算
+    val dp = IntArray(s.length)
+    dp[0] = 0
+    var max = 0
+    for (i in 1 until s.length) {
+        if (s[i] == '(') {
+            // 结尾是 ( 没办法配对
+            dp[i] = 0
+        } else {
+            // 结尾是 ) 找前面配对的位置
+            if (s[i - 1] == '(') {
+                // 和 s[i-1]配对
+                // 加上 dp[i - 2] : 前面配对的子串
+                dp[i] = 2 + if (i >= 2) dp[i - 2] else 0
+            } else {
+                // s[i-1] 没法配对，再找前面的
+                // 找 已经和 s[i-1] 配对的前面一个字符( i - dp[i-1] - 1)看看能不能是不是落单的
+                val preCouldMatchPoi = i - dp[i - 1] - 1
+                if (preCouldMatchPoi >= 0 && s[preCouldMatchPoi] == '(') {
+                    // dp[preCouldMatchPoi - 1] 可能前面还有一段 (..)对的括号
+                    dp[i] = dp[i - 1] + 2 + if (preCouldMatchPoi - 1 >= 0) dp[preCouldMatchPoi - 1] else 0
+                }
+            }
+        }
+        max = Math.max(max, dp[i])
+    }
+    return max
+}
