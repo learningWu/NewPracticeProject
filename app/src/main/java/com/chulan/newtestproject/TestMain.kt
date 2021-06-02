@@ -428,67 +428,6 @@ fun minDistance(word1: String, word2: String): Int {
     return dp[m - 1][n - 1]
 }
 
-fun firstUniqChar(s: String): Int {
-    val counter = IntArray(26)
-    for (c in s) counter[c - 'a']++
-    for (i in s.indices)
-        if (counter[s[i] - 'a'] == 1)
-            return i
-    return -1
-}
-
-fun myAtoi(s: String): Int {
-    var res = 0L
-    var startCompute = false
-    var isNega = false
-    loop@ for (c in s) {
-        if (startCompute && !Character.isDigit(c)) {
-            break
-        }
-        when (c) {
-            '+', '-' -> {
-                startCompute = true
-                if (c == '-') isNega = true
-            }
-            ' ' -> continue@loop
-            in '0'..'9' -> {
-                startCompute = true
-                res = res * 10 + (c - '0')
-                val stopCompute = isNega && -res < Int.MIN_VALUE || (!isNega && res > Int.MAX_VALUE)
-                if (stopCompute) break@loop
-            }
-            else -> break@loop
-        }
-    }
-    return if (isNega) {
-        Math.max(Int.MIN_VALUE.toLong(), -res).toInt()
-    } else {
-        Math.min(Int.MAX_VALUE.toLong(), res).toInt()
-    }
-}
-
-fun reverseStr(s: String, k: Int): String {
-    val array = s.toCharArray()
-    var reverseStart = 0
-    while (reverseStart < array.size) {
-        reverse(array, reverseStart, Math.min(reverseStart + k - 1, array.size - 1))
-        reverseStart += 2 * k
-    }
-    return String(array)
-}
-
-fun reverse(charArray: CharArray, start: Int, end: Int) {
-    var i = start
-    var j = end
-    while (i < j) {
-        charArray[i] = charArray[j].apply {
-            charArray[j] = charArray[i]
-        }
-        i++
-        j--
-    }
-}
-
 fun reverseOnlyLetters(s: String): String {
     var left = 0
     var right = s.length - 1
@@ -569,21 +508,6 @@ fun validPalindrome(s: String): Boolean {
     return true
 }
 
-fun isIsomorphic(s: String, t: String): Boolean {
-    val hashMap = HashMap<Char, Char>()
-    for (i in s.indices) {
-        if (hashMap.containsKey(s[i]) || hashMap.containsValue(t[i])) {
-            // 有新人想破坏关系
-            if (hashMap[s[i]] != t[i])
-                return false
-        } else {
-            // 建立关系
-            hashMap[s[i]] = t[i]
-        }
-    }
-    return true
-}
-
 fun maxValue(n: String, x: Int): String {
     val sb = StringBuilder(n)
     var isNeg = false
@@ -600,6 +524,93 @@ fun maxValue(n: String, x: Int): String {
     return sb.append(x).toString()
 }
 
-//fun numDistinct(s: String, t: String): Int {
-//
-//}
+fun numDistinct(s: String, t: String): Int {
+    //  t[i] == s[j] 可以有两种匹配出 s[0..i] 的结果 => s[0 until j] 和 s[0..j] （新来的i和 j 这个元素匹配，或者当j这个元素不存在，继续之前已经获得的匹配能力）
+    val m = t.length + 1
+    val n = s.length + 1
+    val dp = Array(m) { IntArray(n) }
+    // 空字符串是如何字符串的一个子集。a,ab,abc都只能“摘出”一个空字符串“”作为去匹配空字符串“”的匹配子序列
+    for (i in 0 until n) dp[0][i] = 1
+    for (i in 1 until m)
+        for (j in 1 until n) {
+            if (t[i - 1] == s[j - 1]) {
+                // 可以选择是否和这个 j 去作为配对字符：1.选择 dp[i - 1][j - 1]  2.不选择 dp[i][j - 1]
+                dp[i][j] = dp[i - 1][j - 1] + dp[i][j - 1]
+            } else {
+                // 不相等只有一种选择，不与这个 j 去作为配对字符
+                dp[i][j] = dp[i][j - 1]
+            }
+        }
+    return dp[m - 1][n - 1]
+}
+
+fun firstUniqChar(s: String): Int {
+    val array = IntArray(26)
+    s.forEach { array[it - 'a']++ }
+    s.forEachIndexed { index, c ->
+        if (array[c - 'a'] == 1) return index
+    }
+    return -1
+}
+
+fun myAtoi(s: String): Int {
+    var startCompute = false
+    var isNeg = false
+    var res = 0L
+    loop@ for (c in s) {
+        if (startCompute && c !in '0'..'9') {
+            break
+        }
+        when (c) {
+            '+', '-' -> {
+                startCompute = true
+                isNeg = c == '-'
+            }
+            ' ' -> continue@loop
+            in '0'..'9' -> {
+                startCompute = true
+                res = res * 10 + (c - '0')
+                if (isNeg && -res <= Int.MIN_VALUE || (!isNeg && res >= Int.MAX_VALUE)) break@loop
+            }
+            else -> break@loop
+        }
+    }
+    return if (isNeg) {
+        Math.max(Int.MIN_VALUE.toLong(), -res).toInt()
+    } else {
+        Math.min(Int.MAX_VALUE.toLong(), res).toInt()
+    }
+}
+
+fun reverseStr(s: String, k: Int): String {
+    var reverseStart = 0
+    val array = s.toCharArray()
+    while (reverseStart in array.indices) {
+        reverse(array, reverseStart, Math.min(array.size - 1, reverseStart + k - 1))
+        reverseStart += 2 * k
+    }
+    return String(array)
+}
+
+fun reverse(charArray: CharArray, start: Int, end: Int) {
+    var i = start
+    var j = end
+    while (i < j) {
+        charArray[i] = charArray[j].apply {
+            charArray[j] = charArray[i]
+        }
+        i++
+        j--
+    }
+}
+
+fun isIsomorphic(s: String, t: String): Boolean {
+    val map = HashMap<Char, Char>()
+    for (i in s.indices) {
+        if ((map.contains(s[i]) || map.containsValue(t[i])) && map[s[i]] != t[i]) {
+            return false
+        }
+        map[s[i]] = t[i]
+    }
+    return true
+}
