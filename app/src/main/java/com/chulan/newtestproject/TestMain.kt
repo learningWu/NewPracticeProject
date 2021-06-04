@@ -2,6 +2,7 @@ package com.chulan.newtestproject
 
 import java.lang.StringBuilder
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
@@ -454,60 +455,6 @@ fun reverseWords(s: String): String {
     return s.split(" ").map { it.reversed() }.joinToString(" ")
 }
 
-fun findAnagrams(s: String, p: String): List<Int> {
-    //s: "cbaebabacd" p: "abc"
-    // 滑动窗口
-    var subStart = 0
-    val k = p.length
-    val result = LinkedList<Int>()
-    while (subStart + k - 1 < s.length) {
-        val sub = s.substring(subStart, subStart + k)
-        if (isDifferentPoiWord(sub, p)) {
-            result.add(subStart)
-        }
-        subStart++
-    }
-    return result
-}
-
-fun isDifferentPoiWord(s: String, p: String): Boolean {
-    if (s.length != p.length) return false
-    val array = IntArray(26)
-    for (i in s.indices) {
-        array[s[i] - 'a']++
-        array[p[i] - 'a']--
-    }
-    for (v in array) {
-        if (v != 0) return false
-    }
-    return true
-}
-
-var isSaved = false
-fun validPalindrome(s: String): Boolean {
-    var left = 0
-    var right = s.length - 1
-    while (left < right) {
-        if (s[left] != s[right]) {
-            if (!isSaved) {
-                // 抢救一下
-                isSaved = true
-                // 删除左边这个，中间这段是否回文
-                val leftRemovedSubValid = validPalindrome(s.substring(left + 1, right + 1))
-                // 删除右边这个，中间这段是否回文
-                val rightRemovedSubValid = validPalindrome(s.substring(left, right))
-                // 抢救结果
-                return leftRemovedSubValid || rightRemovedSubValid
-            } else {
-                return false
-            }
-        }
-        left++
-        right--
-    }
-    return true
-}
-
 fun maxValue(n: String, x: Int): String {
     val sb = StringBuilder(n)
     var isNeg = false
@@ -522,26 +469,6 @@ fun maxValue(n: String, x: Int): String {
         }
     }
     return sb.append(x).toString()
-}
-
-fun numDistinct(s: String, t: String): Int {
-    //  t[i] == s[j] 可以有两种匹配出 s[0..i] 的结果 => s[0 until j] 和 s[0..j] （新来的i和 j 这个元素匹配，或者当j这个元素不存在，继续之前已经获得的匹配能力）
-    val m = t.length + 1
-    val n = s.length + 1
-    val dp = Array(m) { IntArray(n) }
-    // 空字符串是如何字符串的一个子集。a,ab,abc都只能“摘出”一个空字符串“”作为去匹配空字符串“”的匹配子序列
-    for (i in 0 until n) dp[0][i] = 1
-    for (i in 1 until m)
-        for (j in 1 until n) {
-            if (t[i - 1] == s[j - 1]) {
-                // 可以选择是否和这个 j 去作为配对字符：1.选择 dp[i - 1][j - 1]  2.不选择 dp[i][j - 1]
-                dp[i][j] = dp[i - 1][j - 1] + dp[i][j - 1]
-            } else {
-                // 不相等只有一种选择，不与这个 j 去作为配对字符
-                dp[i][j] = dp[i][j - 1]
-            }
-        }
-    return dp[m - 1][n - 1]
 }
 
 fun firstUniqChar(s: String): Int {
@@ -613,4 +540,101 @@ fun isIsomorphic(s: String, t: String): Boolean {
         map[s[i]] = t[i]
     }
     return true
+}
+
+var isSaved = false
+fun validPalindrome(s: String): Boolean {
+    var left = 0
+    var right = s.length - 1
+    while (left < right) {
+        if (s[left] != s[right]) {
+            var res = false
+            if (!isSaved) {
+                isSaved = true
+                left + 1 in s.indices && validPalindrome(s.substring(left + 1, right)).also {
+                    if (it) res = it
+                }
+                right - 1 in s.indices && validPalindrome(s.substring(left, right - 1)).also {
+                    if (it) res = it
+                }
+            }
+            return res
+        }
+        left++
+        right--
+    }
+    return true
+}
+
+fun findAnagrams(s: String, p: String): List<Int> {
+    //s: "cbaebabacd" p: "abc"
+    // 滑动窗口
+    val sArray = IntArray(26)
+    val pArray = IntArray(26)
+    val sCharArray = s.toCharArray()
+    val pCharArray = p.toCharArray()
+    val m = pCharArray.size
+    val result = ArrayList<Int>()
+    if (s.length < p.length) return result
+
+    for (i in p.indices) {
+        sArray[sCharArray[i] - 'a']++
+        pArray[pCharArray[i] - 'a']++
+    }
+    if (sArray.contentEquals(pArray)) {
+        result.add(0)
+    }
+
+    for (i in m until sCharArray.size) {
+        // 移动滑动窗口
+        sArray[sCharArray[i - m] - 'a']--
+        sArray[sCharArray[i] - 'a']++
+        if (sArray.contentEquals(pArray)) {
+            result.add(i - m + 1)
+        }
+    }
+    return result
+}
+
+fun numDistinct(s: String, t: String): Int {
+    val m = t.length + 1
+    val n = s.length + 1
+    // dp[i][j] : 代表 t[0..i] 在 s[0..j] 中匹配的子序列数量
+    val dp = Array(m) { IntArray(n) }
+    for (i in 0 until n) dp[0][i] = 1
+    for (i in 1 until m)
+        for (j in 1 until n) {
+            if (t[i - 1] == s[j - 1]) {
+                // 有两种配对选择。1. 和 J 配对 2. 不和 j 配对(j 只是个凑数的)
+                dp[i][j] = dp[i - 1][j - 1] + dp[i][j - 1]
+            } else {
+                dp[i][j] = dp[i][j - 1]
+            }
+        }
+    return dp[m - 1][n - 1]
+}
+
+fun longestValidParentheses(s: String): Int {
+    val cArray = s.toCharArray()
+    if (cArray.size <= 1) return 0
+    val dp = IntArray(cArray.size)
+    var max = 0
+    for (i in 1 until cArray.size) {
+        if (cArray[i] == ')') {
+            when (cArray[i - 1]) {
+                '(' -> dp[i] = 2 + if (i >= 2) dp[i - 2] else 0
+                ')' -> {
+                    val lastCouldPairIndex = i - dp[i - 1] - 1
+                    if (lastCouldPairIndex >= 0) {
+                        if (cArray[lastCouldPairIndex] == '(') {
+                            dp[i] =
+                                dp[i - 1] + 2 + if (lastCouldPairIndex - 1 >= 0) dp[lastCouldPairIndex - 1] else 0
+                        }
+                    }
+                }
+            }
+            max = Math.max(dp[i], max)
+        }
+    }
+    return max
 }
