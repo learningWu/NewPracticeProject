@@ -29,6 +29,7 @@ fun main() {
 //    } else {
 //        print("没有360")
 //    }
+    isMatch("aab", "c*a*b")
 }
 
 internal class Trie
@@ -637,4 +638,31 @@ fun longestValidParentheses(s: String): Int {
         }
     }
     return max
+}
+
+fun isMatch(s: String, p: String): Boolean {
+    val m = p.length + 1
+    val n = s.length + 1
+    val dp = Array(m) { BooleanArray(n) }
+    dp[0][0] = true
+    for (i in 1 until m)
+        for (j in 0 until n) {
+            if (p[i - 1] == '*') {
+                // 不使用上一个p元素进行匹配
+                dp[i][j] = dp[i - 2][j]
+                if (j > 0 && matches(s, p, i - 2, Math.max(j - 1, 0))) {
+                    // 上一个 p 元素匹配上
+                    // *重复一次 dp[i - 1][j - 1]
+                    // *重复n次 dp[i][j - 1]
+                    dp[i][j] = dp[i][j] || dp[i - 1][j - 1] || dp[i][j - 1]
+                }
+            } else if (j > 0 && matches(s, p, i - 1, Math.max(j - 1, 0))) {
+                dp[i][j] = dp[i - 1][j - 1]
+            }
+        }
+    return dp[m - 1][n - 1]
+}
+
+fun matches(s: String, p: String, i: Int, j: Int): Boolean {
+    return if (p[i] == '.') true else s[j] == p[i]
 }
