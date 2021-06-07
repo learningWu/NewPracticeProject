@@ -666,3 +666,46 @@ fun isMatch(s: String, p: String): Boolean {
 fun matches(s: String, p: String, i: Int, j: Int): Boolean {
     return if (p[i] == '.') true else s[j] == p[i]
 }
+
+fun toLowerCase(s: String): String {
+    val array = s.toCharArray()
+    for (i in array.indices) {
+        if (array[i] in 'A'..'Z') {
+            array[i] = array[i] + ('a' - 'A')
+        }
+    }
+    return String(array)
+}
+
+fun lengthOfLastWord(s: String): Int {
+    val array = s.toCharArray()
+    var result = 0
+    for (i in array.size - 1 downTo 0) {
+        if (array[i] == ' ') {
+            if (result == 0) continue
+            break
+        }
+        result++
+    }
+    return result
+}
+
+fun numJewelsInStones(jewels: String, stones: String): Int {
+    var result = 0
+    val stonesMap = HashMap<Char, Int>()
+    val stoneArray = stones.toCharArray()
+    val jewelArray = jewels.toCharArray()
+    for (stone in stoneArray) {
+        if (stonesMap[stone] == null) {
+            stonesMap[stone] = 1
+        } else {
+            stonesMap[stone] = stonesMap[stone]!! + 1
+        }
+    }
+    for (jewel in jewelArray) {
+        stonesMap[jewel]?.apply {
+            result += this
+        }
+    }
+    return result
+}
