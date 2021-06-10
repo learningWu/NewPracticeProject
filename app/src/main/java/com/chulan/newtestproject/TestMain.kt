@@ -29,7 +29,7 @@ fun main() {
 //    } else {
 //        print("没有360")
 //    }
-    isMatch("aab", "c*a*b")
+    lengthOfLastWord("Hello world")
 }
 
 internal class Trie
@@ -456,22 +456,6 @@ fun reverseWords(s: String): String {
     return s.split(" ").map { it.reversed() }.joinToString(" ")
 }
 
-fun maxValue(n: String, x: Int): String {
-    val sb = StringBuilder(n)
-    var isNeg = false
-    for (i in sb.indices) {
-        if (sb[i] == '-') {
-            isNeg = true
-            continue
-        }
-        if (isNeg && x < sb[i] - '0' || (!isNeg && x > sb[i] - '0')) {
-            sb.insert(i, x)
-            return sb.toString()
-        }
-    }
-    return sb.append(x).toString()
-}
-
 fun firstUniqChar(s: String): Int {
     val array = IntArray(26)
     s.forEach { array[it - 'a']++ }
@@ -597,24 +581,6 @@ fun findAnagrams(s: String, p: String): List<Int> {
     return result
 }
 
-fun numDistinct(s: String, t: String): Int {
-    val m = t.length + 1
-    val n = s.length + 1
-    // dp[i][j] : 代表 t[0..i] 在 s[0..j] 中匹配的子序列数量
-    val dp = Array(m) { IntArray(n) }
-    for (i in 0 until n) dp[0][i] = 1
-    for (i in 1 until m)
-        for (j in 1 until n) {
-            if (t[i - 1] == s[j - 1]) {
-                // 有两种配对选择。1. 和 J 配对 2. 不和 j 配对(j 只是个凑数的)
-                dp[i][j] = dp[i - 1][j - 1] + dp[i][j - 1]
-            } else {
-                dp[i][j] = dp[i][j - 1]
-            }
-        }
-    return dp[m - 1][n - 1]
-}
-
 fun longestValidParentheses(s: String): Int {
     val cArray = s.toCharArray()
     if (cArray.size <= 1) return 0
@@ -640,31 +606,10 @@ fun longestValidParentheses(s: String): Int {
     return max
 }
 
-fun isMatch(s: String, p: String): Boolean {
-    val m = p.length + 1
-    val n = s.length + 1
-    val dp = Array(m) { BooleanArray(n) }
-    dp[0][0] = true
-    for (i in 1 until m)
-        for (j in 0 until n) {
-            if (p[i - 1] == '*') {
-                // 不使用上一个p元素进行匹配
-                dp[i][j] = dp[i - 2][j]
-                if (j > 0 && matches(s, p, i - 2, Math.max(j - 1, 0))) {
-                    // 上一个 p 元素匹配上
-                    // *重复一次 dp[i - 1][j - 1]
-                    // *重复n次 dp[i][j - 1]
-                    dp[i][j] = dp[i][j] || dp[i - 1][j - 1] || dp[i][j - 1]
-                }
-            } else if (j > 0 && matches(s, p, i - 1, Math.max(j - 1, 0))) {
-                dp[i][j] = dp[i - 1][j - 1]
-            }
-        }
-    return dp[m - 1][n - 1]
-}
-
-fun matches(s: String, p: String, i: Int, j: Int): Boolean {
-    return if (p[i] == '.') true else s[j] == p[i]
+fun match(p: String, s: String, i: Int, j: Int): Boolean {
+    // j == -1 二维中指向的是 ""
+    if (j < 0) return false
+    return if (p[i] == '.') true else p[i] == s[j]
 }
 
 fun toLowerCase(s: String): String {
@@ -678,34 +623,113 @@ fun toLowerCase(s: String): String {
 }
 
 fun lengthOfLastWord(s: String): Int {
-    val array = s.toCharArray()
-    var result = 0
-    for (i in array.size - 1 downTo 0) {
-        if (array[i] == ' ') {
-            if (result == 0) continue
-            break
+    return s.trim().split(Regex(" +")).last().length
+}
+
+fun numJewelsInStones(jewels: String, stones: String): Int {
+    val map = HashMap<Char, Int>()
+    stones.forEach {
+        if (map[it] == null) {
+            map[it] = 1
+        } else {
+            map[it]?.apply {
+                map[it] = this + 1
+            }
         }
-        result++
+    }
+    var result = 0
+    jewels.forEach {
+        map[it]?.apply {
+            if (this > 0) result += this
+        }
     }
     return result
 }
 
-fun numJewelsInStones(jewels: String, stones: String): Int {
-    var result = 0
-    val stonesMap = HashMap<Char, Int>()
-    val stoneArray = stones.toCharArray()
-    val jewelArray = jewels.toCharArray()
-    for (stone in stoneArray) {
-        if (stonesMap[stone] == null) {
-            stonesMap[stone] = 1
+fun maxValue(n: String, x: Int): String {
+    val sb = StringBuilder(n)
+    var isNeg = false
+    for (i in sb.indices) {
+        if (sb[i] == '-') {
+            isNeg = true
+            continue
+        }
+        if (isNeg && x < sb[i] - '0' || !isNeg && x > sb[i] - '0') {
+            sb.insert(i, x)
+            break
+        }
+    }
+    return if (sb.length > n.length) sb.toString() else sb.append(x).toString()
+}
+
+fun isMatch(s: String, p: String): Boolean {
+    val m = p.length + 1
+    val n = s.length + 1
+    val dp = Array(m) { BooleanArray(n) }
+    dp[0][0] = true
+    for (i in 1 until m)
+        for (j in 0 until n) {
+            if (j == 0) {
+                if (p[i - 1] == '*') dp[i][j] = dp[i - 1][j]
+                continue
+            }
+            when (p[i - 1]) {
+                '*' -> {
+                    dp[i][j] = dp[i - 1][j] || dp[i][j - 1]
+                }
+                '?', s[j - 1] -> {
+                    dp[i][j] = dp[i - 1][j - 1]
+                }
+            }
+        }
+    return dp[m - 1][n - 1]
+}
+
+fun numDecodings(s: String): Int {
+    // dp[i] ：包含i字符 从 0..i 的字符，组队数
+    // 和前面是字符组队： dp[i] = dp[ i - 2] ，自己单独一个：dp[i] = dp[i - 1] => dp[i] = dp[i - 2] + dp[i - 1]
+    // s[i] 是 0：dp[i] = dp[ i - 2]
+    val temp = "  $s"
+    val dp = IntArray(temp.length)
+    dp[0] = 1
+    dp[1] = 1
+    for (i in 2 until temp.length) {
+        if (temp[i] == '0') {
+            if (temp[i - 1] in '1'..'2') {
+                // 0 只能看看能不能和前面一个组队
+                dp[i] = dp[i - 2]
+            }
         } else {
-            stonesMap[stone] = stonesMap[stone]!! + 1
+            // 其它元素可以选择先自己一个人 (dp[i - 1] : 除开自己，你们先组好吧，我后面加入就行)
+            dp[i] = dp[i - 1]
+            if (temp[i - 1] == '1' || temp[i - 1] == '2' && temp[i] < '7') {
+                // 选择和前面一个元素组队（dp[i - 2] : 把 i - 1 留给我跟我组队，你们组好先）
+                dp[i] = dp[i] + dp[i - 2]
+            }
         }
     }
-    for (jewel in jewelArray) {
-        stonesMap[jewel]?.apply {
-            result += this
-        }
+    return dp[temp.length - 1]
+}
+
+fun numDistinct(s: String, t: String): Int {
+    // dp[i][j] : t[0..i] 和 s[0..j] 匹配的子序列数量
+    val m = t.length + 1
+    val n = s.length + 1
+    val dp = Array(m) { IntArray(n) }
+    // 每个字符串里都有一个子序列（空串）
+    for (i in 0 until n) {
+        dp[0][i] = 1
     }
-    return result
+    for (i in 1 until m)
+        for (j in 1 until n) {
+            if (t[i - 1] == s[j - 1]) {
+                // 可以匹配有两种组合情况 1. dp[i - 1][j - 1] : 匹配掉，包括我作为和你配对的子序列
+                // 2. dp[i][j - 1] : 取前面能和你配对的子序列
+                dp[i][j] = dp[i - 1][j - 1] + dp[i][j - 1]
+            } else {
+                // 我没办法和你配对，只能看看前面有没有人和你配对成功
+                dp[i][j] = dp[i][j - 1]
+            }
+        }
+    return dp[m - 1][n - 1]
 }
