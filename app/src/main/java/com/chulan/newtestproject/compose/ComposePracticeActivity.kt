@@ -133,7 +133,7 @@ fun Modifier.firstBaselineToTop(
 fun TestSelfColumn() {
     val (text, setText) = remember { mutableStateOf("") }
     SelfColumn {
-        Text(text = "急急急")
+        Text(modifier = Modifier.weight(1f),text = "急急急")
         Text(text = "babybaby")
     }
 }

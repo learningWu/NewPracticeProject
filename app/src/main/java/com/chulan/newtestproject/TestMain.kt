@@ -29,7 +29,12 @@ fun main() {
 //    } else {
 //        print("没有360")
 //    }
-    lengthOfLastWord("Hello world")
+    val array = Array(4) { CharArray(5) }
+    array[0] = charArrayOf('1', '1', '1', '1', '0')
+    array[1] = charArrayOf('1', '1', '0', '1', '0')
+    array[2] = charArrayOf('1', '1', '0', '0', '0')
+    array[3] = charArrayOf('0', '0', '0', '0', '0')
+    maximalRectangle(array)
 }
 
 internal class Trie
@@ -732,4 +737,51 @@ fun numDistinct(s: String, t: String): Int {
             }
         }
     return dp[m - 1][n - 1]
+}
+
+fun maximalRectangle(matrix: Array<CharArray>): Int {
+    if (matrix.isEmpty()) return 0
+
+    // 参考《柱状图中的最大矩形》
+    // 暴力枚举每一个点的 左边高度大于等于自己为左界，右边高度大于等于自己的为右界  => （右边-左边）* 自己的高度
+
+    // 1.构建柱状图
+    val matrixHeight = Array(matrix.size) { IntArray(matrix[0].size) }
+    for (i in matrixHeight[0].indices) {
+        // 第一行
+        matrixHeight[0][i] = matrix[0][i] - '0'
+    }
+    for (i in 1 until matrixHeight.size)
+        for (j in matrixHeight[i].indices) {
+            // 每一层的“柱状图”初始化
+            if (matrix[i][j] == '1') {
+                matrixHeight[i][j] = matrixHeight[i - 1][j] + 1
+            }
+        }
+    var max = 0
+    // 边长
+    var sideLength = 1
+    for (i in matrixHeight.indices)
+        for (j in matrixHeight[i].indices) {
+            // 边长至少为 1
+            sideLength = 1
+            loop1@ for (k in j - 1 downTo 0) {
+                if (matrixHeight[i][k] >= matrixHeight[i][j]) {
+                    // 左边可以组成矩形
+                    sideLength++
+                } else {
+                    break@loop1
+                }
+            }
+            loop2@ for (k in j + 1 until matrixHeight[i].size) {
+                if (matrixHeight[i][k] >= matrixHeight[i][j]) {
+                    // 右边可以组成矩形
+                    sideLength++
+                } else {
+                    break@loop2
+                }
+            }
+            max = Math.max(max, sideLength * matrixHeight[i][j])
+        }
+    return max
 }
