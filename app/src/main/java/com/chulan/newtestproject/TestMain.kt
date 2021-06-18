@@ -29,7 +29,14 @@ fun main() {
 //    } else {
 //        print("没有360")
 //    }
-    racecar(4)
+    val array = Array(2) { CharArray(2) }
+//    array[0] = charArrayOf('1', '0', '1', '0', '0')
+//    array[1] = charArrayOf('1', '0', '1', '1', '1')
+//    array[2] = charArrayOf('1', '1', '1', '1', '1')
+//    array[3] = charArrayOf('1', '0', '0', '1', '0')
+    array[0] = charArrayOf('0', '1')
+    array[1] = charArrayOf('1', '0')
+    maximalRectangle(array)
 }
 
 internal class Trie
@@ -581,31 +588,6 @@ fun findAnagrams(s: String, p: String): List<Int> {
     return result
 }
 
-fun longestValidParentheses(s: String): Int {
-    val cArray = s.toCharArray()
-    if (cArray.size <= 1) return 0
-    val dp = IntArray(cArray.size)
-    var max = 0
-    for (i in 1 until cArray.size) {
-        if (cArray[i] == ')') {
-            when (cArray[i - 1]) {
-                '(' -> dp[i] = 2 + if (i >= 2) dp[i - 2] else 0
-                ')' -> {
-                    val lastCouldPairIndex = i - dp[i - 1] - 1
-                    if (lastCouldPairIndex >= 0) {
-                        if (cArray[lastCouldPairIndex] == '(') {
-                            dp[i] =
-                                dp[i - 1] + 2 + if (lastCouldPairIndex - 1 >= 0) dp[lastCouldPairIndex - 1] else 0
-                        }
-                    }
-                }
-            }
-            max = Math.max(dp[i], max)
-        }
-    }
-    return max
-}
-
 fun match(p: String, s: String, i: Int, j: Int): Boolean {
     // j == -1 二维中指向的是 ""
     if (j < 0) return false
@@ -789,3 +771,85 @@ fun racecar(target: Int): Int {
 }
 
 private fun getDisFromStep(step: Int) = (1 shl step) - 1
+
+fun longestValidParentheses(s: String): Int {
+    // 枚举以当前字符为最后一个字符的最大括号数
+    // 首要条件：当前字符为 )
+    // 可能情况：
+    // 1.上一个连续字符是 ( : 只能与上一个字符组队  dp[i] = dp[i - 2] + 2
+    // 2.上一个连续字符是 ) : 只能查看上一个连续字符的配对字符前面是否是 ( => 是 -》 dp[i] = dp[i-1] + 2 + dp[i - dp[i-1] -2]  ； 否 -》0
+    if (s.isEmpty()) return 0
+    val array = s.toCharArray()
+    val dp = IntArray(array.size)
+    var result = 0
+    for (i in 1 until array.size) {
+        if (array[i] == ')') {
+            if (array[i - 1] == '(') {
+                dp[i] = 2 + if (i - 2 >= 0) dp[i - 2] else 0
+            } else {
+                val lastCountComposeIndex = i - dp[i - 1] - 1
+                if (lastCountComposeIndex >= 0 && array[lastCountComposeIndex] == '(')
+                    dp[i] =
+                        dp[i - 1] + 2 + if (lastCountComposeIndex - 1 >= 0) dp[lastCountComposeIndex - 1] else 0
+            }
+            result = Math.max(result, dp[i])
+        }
+    }
+    return result
+}
+
+fun maximalRectangle(matrix: Array<CharArray>): Int {
+    if (matrix.isEmpty()) return 0
+    val heightMatrix = Array(matrix.size) { IntArray(matrix[0].size) }
+    for (i in matrix.indices)
+        for (j in matrix[i].indices) {
+            val value = matrix[i][j] - '0'
+            if (value == 0) continue
+            heightMatrix[i][j] = if (i == 0) value else value + heightMatrix[i - 1][j]
+        }
+    var result = 0
+    for (i in heightMatrix.indices) {
+        result = Math.max(result, getMaximalRectangle(heightMatrix[i]))
+    }
+    return result
+}
+
+private fun getMaximalRectangle(heightArray: IntArray): Int {
+    // 跳跃法 确定左右界（现在看来有点dp的感觉）
+    val newHeightArray = IntArray(heightArray.size + 2)
+    newHeightArray[0] = -1
+    newHeightArray[newHeightArray.size - 1] = -1
+    heightArray.copyInto(newHeightArray, 1)
+    val dpLeftBound = IntArray(newHeightArray.size)
+    val dpRightBound = IntArray(newHeightArray.size)
+    dpLeftBound[0] = 0
+    dpRightBound[0] = 0
+    dpLeftBound[dpLeftBound.size - 1] = dpLeftBound.size - 1
+    dpRightBound[dpRightBound.size - 1] = dpRightBound.size - 1
+    for (i in 0 until newHeightArray.size) {
+        if (newHeightArray[i] <= 0) continue
+        // 找到左界
+        var leftBoundTemp = i - 1
+        while (newHeightArray[leftBoundTemp] >= newHeightArray[i]) {
+            leftBoundTemp = dpLeftBound[leftBoundTemp]
+        }
+        dpLeftBound[i] = leftBoundTemp
+    }
+    for (i in newHeightArray.size - 1 downTo 0) {
+        if (newHeightArray[i] <= 0) continue
+        // 找到右界
+        var rightBoundTemp = i + 1
+        while (newHeightArray[rightBoundTemp] >= newHeightArray[i]) {
+            rightBoundTemp = dpRightBound[rightBoundTemp]
+        }
+        dpRightBound[i] = rightBoundTemp
+    }
+    var result = 0
+    // 遍历出最大矩形
+    for (i in 1 until newHeightArray.size - 1) {
+        if (newHeightArray[i] <= 0) continue
+        val rectArea = (dpRightBound[i] - dpLeftBound[i] - 1) * newHeightArray[i]
+        result = Math.max(result, rectArea)
+    }
+    return result
+}
