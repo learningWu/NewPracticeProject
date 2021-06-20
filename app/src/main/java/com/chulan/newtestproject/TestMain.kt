@@ -724,52 +724,6 @@ fun isMatchChar(p: Char, s: Char): Boolean {
     return p == s || p == '.'
 }
 
-fun racecar(target: Int): Int {
-    // 有几种到达终点的方式
-    // 1. 连续走 n个A 距离为 2^n - 1 == target
-    // 2. 连续走 n个A 越过 target，然后 倒退转向，再走 n 个 A 抵达 target
-    // 3. 走 n 个 A 没到 target，倒退转向，走 n 个 A ，倒退转向，再走 n 个 A 抵达 target
-    // 所有的这些可达方式中最快的步数就是 dp[target]的结果
-    val dp = IntArray(target + 1) { Int.MAX_VALUE }
-    dp[0] = 0
-    var forwardDistance = 0
-    for (i in 1 until dp.size) {
-        var iMinStep = Int.MAX_VALUE
-        var forward = 1
-        // 1 shl forward - 1 走 forward 个 A 的距离
-        while (getDisFromStep(forward).also { forwardDistance = it } < 2 * i) {
-            when {
-                forwardDistance == i -> {
-                    // 第一种情况
-                    iMinStep = Math.min(iMinStep, forward)
-                }
-                forwardDistance > i -> {
-                    // 第二种情况  forward 前进 + 1 转向 + dp[forwardDistance - i] 回退过掉终点部分的最小步数
-                    iMinStep = Math.min(iMinStep, forward + 1 + dp[forwardDistance - i])
-                }
-                forwardDistance < i -> {
-                    // 第三种情况
-                    // backward = 0 时，先转向减速为 -1 ，之后就可以再转向，将速度降为 1（通过这个两次 R 操作 降速为 1）
-                    var backward = 0
-                    var backwardDistance = 0
-                    while (backward < forward) {
-                        backwardDistance = getDisFromStep(backward)
-                        // forward 前进 + 1 转向 + backward 后退 + 1 转向 + dp[i - forwardDistance + backwardDistance] 最后这段距离到终点的最小步数
-                        iMinStep = Math.min(
-                            iMinStep,
-                            forward + 1 + backward + 1 + dp[i - forwardDistance + backwardDistance]
-                        )
-                        backward++
-                    }
-                }
-            }
-            forward++
-        }
-        dp[i] = iMinStep
-    }
-    return dp[target]
-}
-
 private fun getDisFromStep(step: Int) = (1 shl step) - 1
 
 fun longestValidParentheses(s: String): Int {
@@ -852,4 +806,47 @@ private fun getMaximalRectangle(heightArray: IntArray): Int {
         result = Math.max(result, rectArea)
     }
     return result
+}
+
+fun largestOddNumber(num: String): String {
+    val array = num.toCharArray()
+    for (i in array.size - 1 downTo 0) {
+        if (array[i] - '0' and 1 == 1) {
+            return num.substring(0, i + 1)
+        }
+    }
+    return ""
+}
+
+fun racecar(target: Int): Int {
+    val dp = IntArray(target + 1) { Int.MAX_VALUE }
+    for (tempTarget in 1..target) {
+        var ANum = 1
+        var forwardDistance = 0
+        var minStep = Int.MAX_VALUE
+        // 2 * tempTarget : 也就最多先到 2倍目标地，往回走 （极限可能，走到两倍目标地，再走一半回来，和直接过去一半距离一样）
+        while (((1 shl ANum) - 1).also { forwardDistance = it } <= 2 * tempTarget) {
+            when {
+                forwardDistance == tempTarget -> {
+                    minStep = Math.min(minStep, ANum)
+                }
+                forwardDistance > tempTarget -> {
+                    minStep = Math.min(minStep, ANum + 1 + dp[forwardDistance - tempTarget])
+                }
+                forwardDistance < tempTarget -> {
+                    for (RNum in 0 until ANum) {
+                        // RNum == 0 : 倒车后没有行驶，又反向
+                        val backDistance = (1 shl RNum) - 1
+                        minStep = Math.min(
+                            minStep,
+                            ANum + 1 + RNum + 1 + dp[tempTarget - forwardDistance + backDistance]
+                        )
+                    }
+                }
+            }
+            dp[tempTarget] = minStep
+            ANum++
+        }
+    }
+    return dp[target]
 }
