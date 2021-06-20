@@ -29,11 +29,13 @@ fun main() {
 //    } else {
 //        print("没有360")
 //    }
-    val array = Array(4) { CharArray(5) }
-    array[0] = charArrayOf('1', '1', '1', '1', '0')
-    array[1] = charArrayOf('1', '1', '0', '1', '0')
-    array[2] = charArrayOf('1', '1', '0', '0', '0')
-    array[3] = charArrayOf('0', '0', '0', '0', '0')
+    val array = Array(2) { CharArray(2) }
+//    array[0] = charArrayOf('1', '0', '1', '0', '0')
+//    array[1] = charArrayOf('1', '0', '1', '1', '1')
+//    array[2] = charArrayOf('1', '1', '1', '1', '1')
+//    array[3] = charArrayOf('1', '0', '0', '1', '0')
+    array[0] = charArrayOf('0', '1')
+    array[1] = charArrayOf('1', '0')
     maximalRectangle(array)
 }
 
@@ -586,31 +588,6 @@ fun findAnagrams(s: String, p: String): List<Int> {
     return result
 }
 
-fun longestValidParentheses(s: String): Int {
-    val cArray = s.toCharArray()
-    if (cArray.size <= 1) return 0
-    val dp = IntArray(cArray.size)
-    var max = 0
-    for (i in 1 until cArray.size) {
-        if (cArray[i] == ')') {
-            when (cArray[i - 1]) {
-                '(' -> dp[i] = 2 + if (i >= 2) dp[i - 2] else 0
-                ')' -> {
-                    val lastCouldPairIndex = i - dp[i - 1] - 1
-                    if (lastCouldPairIndex >= 0) {
-                        if (cArray[lastCouldPairIndex] == '(') {
-                            dp[i] =
-                                dp[i - 1] + 2 + if (lastCouldPairIndex - 1 >= 0) dp[lastCouldPairIndex - 1] else 0
-                        }
-                    }
-                }
-            }
-            max = Math.max(dp[i], max)
-        }
-    }
-    return max
-}
-
 fun match(p: String, s: String, i: Int, j: Int): Boolean {
     // j == -1 二维中指向的是 ""
     if (j < 0) return false
@@ -667,55 +644,6 @@ fun maxValue(n: String, x: Int): String {
     return if (sb.length > n.length) sb.toString() else sb.append(x).toString()
 }
 
-fun isMatch(s: String, p: String): Boolean {
-    val m = p.length + 1
-    val n = s.length + 1
-    val dp = Array(m) { BooleanArray(n) }
-    dp[0][0] = true
-    for (i in 1 until m)
-        for (j in 0 until n) {
-            if (j == 0) {
-                if (p[i - 1] == '*') dp[i][j] = dp[i - 1][j]
-                continue
-            }
-            when (p[i - 1]) {
-                '*' -> {
-                    dp[i][j] = dp[i - 1][j] || dp[i][j - 1]
-                }
-                '?', s[j - 1] -> {
-                    dp[i][j] = dp[i - 1][j - 1]
-                }
-            }
-        }
-    return dp[m - 1][n - 1]
-}
-
-fun numDecodings(s: String): Int {
-    // dp[i] ：包含i字符 从 0..i 的字符，组队数
-    // 和前面是字符组队： dp[i] = dp[ i - 2] ，自己单独一个：dp[i] = dp[i - 1] => dp[i] = dp[i - 2] + dp[i - 1]
-    // s[i] 是 0：dp[i] = dp[ i - 2]
-    val temp = "  $s"
-    val dp = IntArray(temp.length)
-    dp[0] = 1
-    dp[1] = 1
-    for (i in 2 until temp.length) {
-        if (temp[i] == '0') {
-            if (temp[i - 1] in '1'..'2') {
-                // 0 只能看看能不能和前面一个组队
-                dp[i] = dp[i - 2]
-            }
-        } else {
-            // 其它元素可以选择先自己一个人 (dp[i - 1] : 除开自己，你们先组好吧，我后面加入就行)
-            dp[i] = dp[i - 1]
-            if (temp[i - 1] == '1' || temp[i - 1] == '2' && temp[i] < '7') {
-                // 选择和前面一个元素组队（dp[i - 2] : 把 i - 1 留给我跟我组队，你们组好先）
-                dp[i] = dp[i] + dp[i - 2]
-            }
-        }
-    }
-    return dp[temp.length - 1]
-}
-
 fun numDistinct(s: String, t: String): Int {
     // dp[i][j] : t[0..i] 和 s[0..j] 匹配的子序列数量
     val m = t.length + 1
@@ -739,49 +667,189 @@ fun numDistinct(s: String, t: String): Int {
     return dp[m - 1][n - 1]
 }
 
+fun numDecodings(s: String): Int {
+    val array = s.toCharArray()
+    if (array[0] == '0') return 0
+    val dp = IntArray(array.size)
+    dp[0] = 1
+    for (i in 1 until array.size) {
+        if (couldAlone(array[i])) {
+            dp[i] = dp[i - 1]
+        }
+        if (couldCompose(array[i - 1], array[i])) {
+            dp[i] = dp[i] + if (i >= 2) dp[i - 2] else 1
+        }
+    }
+    return dp[array.size - 1]
+}
+
+private fun couldCompose(front: Char, behind: Char) =
+    front == '1' && behind in '0'..'9' || front == '2' && behind in '0'..'6'
+
+private fun couldAlone(element: Char) = element in '1'..'9'
+
+fun isMatch(s: String, p: String): Boolean {
+    // a* 可以是 空 ；a；aa(n个a)
+    val sArray = s.toCharArray()
+    val pArray = p.toCharArray()
+    val m = pArray.size + 1
+    val n = sArray.size + 1
+    val dp = Array(m) { BooleanArray(n) }
+    // dp[0][0]  空对空 =》true
+    dp[0][0] = true
+    for (i in 1 until m)
+        for (j in 0 until n) {
+            when (pArray[i - 1]) {
+                '*' -> {
+                    // a* => 空 : dp[i - 2][j]
+                    dp[i][j] = dp[i - 2][j]
+                    // i 在第二行之后 才有可能出现'*' ，所以 i - 2 不会越界
+                    if (j > 0 && isMatchChar(pArray[i - 2], sArray[j - 1])) {
+                        // a* => a : dp[i - 1][j]  ;  a* => aa[n个a] : dp[i][j - 1]
+                        dp[i][j] = dp[i][j] || dp[i - 1][j] || dp[i][j - 1]
+                    }
+                }
+
+                else -> {
+                    if (j > 0 && isMatchChar(pArray[i - 1], sArray[j - 1])) {
+                        dp[i][j] = dp[i - 1][j - 1]
+                    }
+                }
+            }
+        }
+    return dp[m - 1][n - 1]
+}
+
+fun isMatchChar(p: Char, s: Char): Boolean {
+    return p == s || p == '.'
+}
+
+fun racecar(target: Int): Int {
+    // 有几种到达终点的方式
+    // 1. 连续走 n个A 距离为 2^n - 1 == target
+    // 2. 连续走 n个A 越过 target，然后 倒退转向，再走 n 个 A 抵达 target
+    // 3. 走 n 个 A 没到 target，倒退转向，走 n 个 A ，倒退转向，再走 n 个 A 抵达 target
+    // 所有的这些可达方式中最快的步数就是 dp[target]的结果
+    val dp = IntArray(target + 1) { Int.MAX_VALUE }
+    dp[0] = 0
+    var forwardDistance = 0
+    for (i in 1 until dp.size) {
+        var iMinStep = Int.MAX_VALUE
+        var forward = 1
+        // 1 shl forward - 1 走 forward 个 A 的距离
+        while (getDisFromStep(forward).also { forwardDistance = it } < 2 * i) {
+            when {
+                forwardDistance == i -> {
+                    // 第一种情况
+                    iMinStep = Math.min(iMinStep, forward)
+                }
+                forwardDistance > i -> {
+                    // 第二种情况  forward 前进 + 1 转向 + dp[forwardDistance - i] 回退过掉终点部分的最小步数
+                    iMinStep = Math.min(iMinStep, forward + 1 + dp[forwardDistance - i])
+                }
+                forwardDistance < i -> {
+                    // 第三种情况
+                    // backward = 0 时，先转向减速为 -1 ，之后就可以再转向，将速度降为 1（通过这个两次 R 操作 降速为 1）
+                    var backward = 0
+                    var backwardDistance = 0
+                    while (backward < forward) {
+                        backwardDistance = getDisFromStep(backward)
+                        // forward 前进 + 1 转向 + backward 后退 + 1 转向 + dp[i - forwardDistance + backwardDistance] 最后这段距离到终点的最小步数
+                        iMinStep = Math.min(
+                            iMinStep,
+                            forward + 1 + backward + 1 + dp[i - forwardDistance + backwardDistance]
+                        )
+                        backward++
+                    }
+                }
+            }
+            forward++
+        }
+        dp[i] = iMinStep
+    }
+    return dp[target]
+}
+
+private fun getDisFromStep(step: Int) = (1 shl step) - 1
+
+fun longestValidParentheses(s: String): Int {
+    // 枚举以当前字符为最后一个字符的最大括号数
+    // 首要条件：当前字符为 )
+    // 可能情况：
+    // 1.上一个连续字符是 ( : 只能与上一个字符组队  dp[i] = dp[i - 2] + 2
+    // 2.上一个连续字符是 ) : 只能查看上一个连续字符的配对字符前面是否是 ( => 是 -》 dp[i] = dp[i-1] + 2 + dp[i - dp[i-1] -2]  ； 否 -》0
+    if (s.isEmpty()) return 0
+    val array = s.toCharArray()
+    val dp = IntArray(array.size)
+    var result = 0
+    for (i in 1 until array.size) {
+        if (array[i] == ')') {
+            if (array[i - 1] == '(') {
+                dp[i] = 2 + if (i - 2 >= 0) dp[i - 2] else 0
+            } else {
+                val lastCountComposeIndex = i - dp[i - 1] - 1
+                if (lastCountComposeIndex >= 0 && array[lastCountComposeIndex] == '(')
+                    dp[i] =
+                        dp[i - 1] + 2 + if (lastCountComposeIndex - 1 >= 0) dp[lastCountComposeIndex - 1] else 0
+            }
+            result = Math.max(result, dp[i])
+        }
+    }
+    return result
+}
+
 fun maximalRectangle(matrix: Array<CharArray>): Int {
     if (matrix.isEmpty()) return 0
-
-    // 参考《柱状图中的最大矩形》
-    // 暴力枚举每一个点的 左边高度大于等于自己为左界，右边高度大于等于自己的为右界  => （右边-左边）* 自己的高度
-
-    // 1.构建柱状图
-    val matrixHeight = Array(matrix.size) { IntArray(matrix[0].size) }
-    for (i in matrixHeight[0].indices) {
-        // 第一行
-        matrixHeight[0][i] = matrix[0][i] - '0'
+    val heightMatrix = Array(matrix.size) { IntArray(matrix[0].size) }
+    for (i in matrix.indices)
+        for (j in matrix[i].indices) {
+            val value = matrix[i][j] - '0'
+            if (value == 0) continue
+            heightMatrix[i][j] = if (i == 0) value else value + heightMatrix[i - 1][j]
+        }
+    var result = 0
+    for (i in heightMatrix.indices) {
+        result = Math.max(result, getMaximalRectangle(heightMatrix[i]))
     }
-    for (i in 1 until matrixHeight.size)
-        for (j in matrixHeight[i].indices) {
-            // 每一层的“柱状图”初始化
-            if (matrix[i][j] == '1') {
-                matrixHeight[i][j] = matrixHeight[i - 1][j] + 1
-            }
+    return result
+}
+
+private fun getMaximalRectangle(heightArray: IntArray): Int {
+    // 跳跃法 确定左右界（现在看来有点dp的感觉）
+    val newHeightArray = IntArray(heightArray.size + 2)
+    newHeightArray[0] = -1
+    newHeightArray[newHeightArray.size - 1] = -1
+    heightArray.copyInto(newHeightArray, 1)
+    val dpLeftBound = IntArray(newHeightArray.size)
+    val dpRightBound = IntArray(newHeightArray.size)
+    dpLeftBound[0] = 0
+    dpRightBound[0] = 0
+    dpLeftBound[dpLeftBound.size - 1] = dpLeftBound.size - 1
+    dpRightBound[dpRightBound.size - 1] = dpRightBound.size - 1
+    for (i in 0 until newHeightArray.size) {
+        if (newHeightArray[i] <= 0) continue
+        // 找到左界
+        var leftBoundTemp = i - 1
+        while (newHeightArray[leftBoundTemp] >= newHeightArray[i]) {
+            leftBoundTemp = dpLeftBound[leftBoundTemp]
         }
-    var max = 0
-    // 边长
-    var sideLength = 1
-    for (i in matrixHeight.indices)
-        for (j in matrixHeight[i].indices) {
-            // 边长至少为 1
-            sideLength = 1
-            loop1@ for (k in j - 1 downTo 0) {
-                if (matrixHeight[i][k] >= matrixHeight[i][j]) {
-                    // 左边可以组成矩形
-                    sideLength++
-                } else {
-                    break@loop1
-                }
-            }
-            loop2@ for (k in j + 1 until matrixHeight[i].size) {
-                if (matrixHeight[i][k] >= matrixHeight[i][j]) {
-                    // 右边可以组成矩形
-                    sideLength++
-                } else {
-                    break@loop2
-                }
-            }
-            max = Math.max(max, sideLength * matrixHeight[i][j])
+        dpLeftBound[i] = leftBoundTemp
+    }
+    for (i in newHeightArray.size - 1 downTo 0) {
+        if (newHeightArray[i] <= 0) continue
+        // 找到右界
+        var rightBoundTemp = i + 1
+        while (newHeightArray[rightBoundTemp] >= newHeightArray[i]) {
+            rightBoundTemp = dpRightBound[rightBoundTemp]
         }
-    return max
+        dpRightBound[i] = rightBoundTemp
+    }
+    var result = 0
+    // 遍历出最大矩形
+    for (i in 1 until newHeightArray.size - 1) {
+        if (newHeightArray[i] <= 0) continue
+        val rectArea = (dpRightBound[i] - dpLeftBound[i] - 1) * newHeightArray[i]
+        result = Math.max(result, rectArea)
+    }
+    return result
 }
