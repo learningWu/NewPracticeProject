@@ -850,3 +850,66 @@ fun racecar(target: Int): Int {
     }
     return dp[target]
 }
+
+fun climbStairs(n: Int): Int {
+    if (n <= 2) return n
+    val dp = IntArray(n + 1)
+    dp[1] = 1
+    dp[2] = 2
+    for (i in 3 until dp.size) {
+        dp[i] = dp[i - 1] + dp[i - 2]
+    }
+    return dp[n]
+}
+
+fun minCostClimbingStairs(cost: IntArray): Int {
+    // dp : 到达每个阶梯的最小花费
+    // 求 dp[cost.size + 1] : 顶层阶梯
+    if (cost.size < 2) return 0
+    val target = cost.size + 1
+    val dp = IntArray(target)
+    dp[0] = 0
+    dp[1] = 0
+    for (i in 2 until dp.size) {
+        dp[i] = Math.min(dp[i - 1] + cost[i - 1], dp[i - 2] + cost[i - 2])
+    }
+    return dp[target - 1]
+}
+
+fun uniquePaths(m: Int, n: Int): Int {
+    val dp = Array(m) { IntArray(n) }
+    for (i in 0 until m)
+        for (j in 0 until n) {
+            if (i == 0 || j == 0) {
+                dp[i][j] = 1
+                continue
+            }
+            dp[i][j] = dp[i - 1][j] + dp[i][j - 1]
+        }
+    return dp[m - 1][n - 1]
+}
+
+fun rob(nums: IntArray): Int {
+    if (nums.size == 1) return nums[0]
+    if (nums.size == 2) return Math.max(nums[0], nums[1])
+    // dp[i] : 有 i 个房子可以去偷，偷到的最大值
+    val dp = IntArray(nums.size)
+    dp[0] = nums[0]
+    dp[1] = Math.max(nums[0], nums[1])
+    for (i in 2 until dp.size) {
+        dp[i] = Math.max(dp[i - 2] + nums[i], dp[i - 1])
+    }
+    return dp[nums.size - 1]
+}
+
+fun minPathSum(grid: Array<IntArray>): Int {
+    val m = grid.size
+    val n = grid[0].size
+    for (i in 1 until m) grid[i][0] = grid[i - 1][0] + grid[i][0]
+    for (i in 1 until n) grid[0][i] = grid[0][i - 1] + grid[0][i]
+    for (i in 1 until m)
+        for (j in 1 until n) {
+            grid[i][j] = Math.min(grid[i - 1][j], grid[i][j - 1]) + grid[i][j]
+        }
+    return grid[m - 1][n - 1]
+}
