@@ -87,6 +87,10 @@ class MainActivity : ComponentActivity() {
         ActionButton(getString(R.string.compose_practice)) {
             startActivity<ComposePracticeActivity>()
         }
+
+        ActionButton(getString(R.string.motion_layout)) {
+            startActivity<MotionLayoutActivity>()
+        }
     }
 
     @Composable

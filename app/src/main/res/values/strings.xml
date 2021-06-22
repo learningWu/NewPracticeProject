@@ -10,4 +10,5 @@
     <string name="drag_layout">拖拽</string>
     <string name="nested_view">嵌套滑动</string>
     <string name="compose_practice">compose 练习</string>
+    <string name="motion_layout">MotionLayout 练习</string>
 </resources>
