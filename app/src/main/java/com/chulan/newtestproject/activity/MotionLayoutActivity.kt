@@ -31,8 +31,10 @@ class MotionLayoutActivity : AppCompatActivity() {
             //↓↓这行代码↓↓ =>layout_constraintTop_toTopOf="parent"
 //            layout.topMargin = 200f.dp2pxInt()
         }
-
+        // 设置 ignore 没用，必须设置这个
+        motionLayout.getConstraintSet(R.id.start).getConstraint(R.id.xxx).propertySet.mVisibilityMode = 1
         findViewById<View>(R.id.tv).setOnClickListener {
+            findViewById<View>(R.id.xxx).visibility = View.VISIBLE
             if (isStart){
                 motionLayout.transitionToEnd()
                 isStart = false

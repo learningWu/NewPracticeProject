@@ -18,6 +18,19 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
+    <TextView
+        android:id="@+id/xxx"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="哈哈哈"
+        android:textSize="50sp"
+        android:visibility="gone"
+        android:textColor="@color/red"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
     <!--  在 MotionScene 中设置后约束后，会将 当前设置的约束重置  -->
     <ImageView
         android:id="@+id/red_star"
