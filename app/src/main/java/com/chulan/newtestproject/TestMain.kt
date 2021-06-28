@@ -1,5 +1,6 @@
 package com.chulan.newtestproject
 
+import androidx.core.util.set
 import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.ArrayList
@@ -34,9 +35,11 @@ fun main() {
 //    array[1] = charArrayOf('1', '0', '1', '1', '1')
 //    array[2] = charArrayOf('1', '1', '1', '1', '1')
 //    array[3] = charArrayOf('1', '0', '0', '1', '0')
-    array[0] = charArrayOf('0', '1')
-    array[1] = charArrayOf('1', '0')
-    maximalRectangle(array)
+//    array[0] = charArrayOf('0', '1')
+//    array[1] = charArrayOf('1', '0')
+//    maximalRectangle(array)
+
+    relativeSortArray(intArrayOf(2, 3, 1, 3, 2, 4, 6, 7, 9, 2, 19), intArrayOf(2, 1, 4, 3, 9, 6))
 }
 
 internal class Trie
@@ -912,4 +915,107 @@ fun minPathSum(grid: Array<IntArray>): Int {
             grid[i][j] = Math.min(grid[i - 1][j], grid[i][j - 1]) + grid[i][j]
         }
     return grid[m - 1][n - 1]
+}
+
+
+fun maxProfit(prices: IntArray): Int {
+    var minPrice = Int.MAX_VALUE
+    var sale = 0
+    prices.forEach {
+        minPrice = Math.min(minPrice, it)
+        sale = Math.max(sale, it - minPrice)
+    }
+    return sale
+}
+
+fun wonderfulSubstrings(word: String): Long {
+    if (word.length <= 1) return word.length.toLong()
+    // 暴力法
+    // 枚举所有以 i 开头的子字符串，查看是否是 “最美”
+    val words = word.toCharArray()
+    var perfectNum = 0L
+    // dp[i][j] : i 起点，j 结束 => 奇数数量  dp[i][j] = 如果 dp[i][j-1]奇数数量为0 ,
+    // 如果 为1，就要去计算
+    val dp = Array(words.size) { LongArray(words.size) }
+    for (i in words.indices) {
+        dp[i][i] = 1
+    }
+    for (i in words.indices) {
+        for (j in i until words.size) {
+            if (j - 1 >= 0 && dp[i][j - 1] == 0L) {
+                dp[i][j] = 1
+            } else {
+                dp[i][j] = checkIsPerfect(words, i, j)
+            }
+            if (dp[i][j] <= 1) {
+                perfectNum++
+            }
+        }
+    }
+    return perfectNum
+}
+
+fun checkIsPerfect(words: CharArray, start: Int, end: Int): Long {
+    val counter = IntArray(10)
+    for (i in start..end) {
+        counter[words[i] - 'a']++
+    }
+    var oddNum = 0L
+    for (i in counter.indices) {
+        if (counter[i] and 1 == 1) {
+            oddNum++
+        }
+    }
+    return oddNum
+}
+
+
+fun relativeSortArray(arr1: IntArray, arr2: IntArray): IntArray {
+    val sparseArray = HashMap<Int, Int>()
+    arr2.forEach {
+        sparseArray[it] = 0
+    }
+    val list = arr1.toMutableList()
+    val needSortList = LinkedList<Int>()
+    list.forEach {
+        if (sparseArray.containsKey(it)) {
+            sparseArray[it] = sparseArray[it]!! + 1
+        } else {
+            needSortList.add(it)
+        }
+    }
+    val result = LinkedList<Int>()
+    arr2.forEach { item ->
+        if (sparseArray.containsKey(item)) {
+            repeat(sparseArray[item]!!) { _ ->
+                result.add(item)
+            }
+        }
+    }
+    needSortList.sort()
+    result.addAll(needSortList)
+    return result.toIntArray()
+}
+
+fun merge(intervals: Array<IntArray>): Array<IntArray> {
+    intervals.sortWith(kotlin.Comparator { o1, o2 ->
+        if (o1[0] == o2[0]) {
+            o2[1] - o1[1]
+        } else {
+            o2[0] - o1[0]
+        }
+    })
+    var index = 1
+    var lastArray = intArrayOf(intervals[0][0], intervals[0][1])
+    val result = ArrayList<IntArray>()
+    while (index in intervals.indices) {
+        if (lastArray[1] >= intervals[index][1] || intervals[index][0] <= lastArray[0]) {
+            lastArray[1] = Math.max(lastArray[1], intervals[index][1])
+            index += 2
+        } else {
+            index++
+        }
+        result.add(lastArray)
+    }
+    return result.toTypedArray()
 }
