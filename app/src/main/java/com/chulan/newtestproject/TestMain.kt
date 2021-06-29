@@ -29,14 +29,14 @@ fun main() {
 //    } else {
 //        print("没有360")
 //    }
-    val array = Array(2) { CharArray(2) }
-//    array[0] = charArrayOf('1', '0', '1', '0', '0')
-//    array[1] = charArrayOf('1', '0', '1', '1', '1')
-//    array[2] = charArrayOf('1', '1', '1', '1', '1')
-//    array[3] = charArrayOf('1', '0', '0', '1', '0')
-    array[0] = charArrayOf('0', '1')
-    array[1] = charArrayOf('1', '0')
-    maximalRectangle(array)
+    val array = arrayOf(
+        intArrayOf(1, 3),
+        intArrayOf(2, 6),
+        intArrayOf(8, 10),
+        intArrayOf(15, 18)
+    )
+
+    merge(array)
 }
 
 internal class Trie
@@ -912,4 +912,31 @@ fun minPathSum(grid: Array<IntArray>): Int {
             grid[i][j] = Math.min(grid[i - 1][j], grid[i][j - 1]) + grid[i][j]
         }
     return grid[m - 1][n - 1]
+}
+
+fun merge(intervals: Array<IntArray>): Array<IntArray> {
+    if (intervals.isEmpty()) return emptyArray()
+    intervals.sortWith(kotlin.Comparator { o1, o2 ->
+        // Comparator返回值为正数时，触发交换
+        // o1[0] > o2[0] 时触发交换
+        o1[0] - o2[0]
+    })
+    val merger = ArrayList<IntArray>()
+    for (i in intervals.indices) {
+        val left = intervals[i][0]
+        val right = intervals[i][1]
+        if (i == 0) {
+            merger.add(intArrayOf(left, right))
+            continue
+        }
+        // 比较是否合并区间：left 小于 已进入区间的 right 即可合并
+        if (left > merger.last()[1]) {
+            // 超过前一个区间的右方：不可合并
+            merger.add(intArrayOf(left, right))
+        } else {
+            // 合并区间：扩大右方区域
+            merger.last()[1] = Math.max(right, merger.last()[1])
+        }
+    }
+    return merger.toTypedArray()
 }
