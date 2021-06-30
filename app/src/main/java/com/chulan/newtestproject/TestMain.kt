@@ -1,6 +1,7 @@
 package com.chulan.newtestproject
 
-import androidx.core.util.set
+import android.os.Build
+import androidx.annotation.RequiresApi
 import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.ArrayList
@@ -30,14 +31,12 @@ fun main() {
 //    } else {
 //        print("没有360")
 //    }
-    val array = Array(2) { CharArray(2) }
-//    array[0] = charArrayOf('1', '0', '1', '0', '0')
-//    array[1] = charArrayOf('1', '0', '1', '1', '1')
-//    array[2] = charArrayOf('1', '1', '1', '1', '1')
-//    array[3] = charArrayOf('1', '0', '0', '1', '0')
-//    array[0] = charArrayOf('0', '1')
-//    array[1] = charArrayOf('1', '0')
-//    maximalRectangle(array)
+    val array = arrayOf(
+        intArrayOf(1, 3),
+        intArrayOf(2, 6),
+        intArrayOf(8, 10),
+        intArrayOf(15, 18)
+    )
 
     relativeSortArray(intArrayOf(2, 3, 1, 3, 2, 4, 6, 7, 9, 2, 19), intArrayOf(2, 1, 4, 3, 9, 6))
 }
@@ -755,62 +754,6 @@ fun longestValidParentheses(s: String): Int {
     return result
 }
 
-fun maximalRectangle(matrix: Array<CharArray>): Int {
-    if (matrix.isEmpty()) return 0
-    val heightMatrix = Array(matrix.size) { IntArray(matrix[0].size) }
-    for (i in matrix.indices)
-        for (j in matrix[i].indices) {
-            val value = matrix[i][j] - '0'
-            if (value == 0) continue
-            heightMatrix[i][j] = if (i == 0) value else value + heightMatrix[i - 1][j]
-        }
-    var result = 0
-    for (i in heightMatrix.indices) {
-        result = Math.max(result, getMaximalRectangle(heightMatrix[i]))
-    }
-    return result
-}
-
-private fun getMaximalRectangle(heightArray: IntArray): Int {
-    // 跳跃法 确定左右界（现在看来有点dp的感觉）
-    val newHeightArray = IntArray(heightArray.size + 2)
-    newHeightArray[0] = -1
-    newHeightArray[newHeightArray.size - 1] = -1
-    heightArray.copyInto(newHeightArray, 1)
-    val dpLeftBound = IntArray(newHeightArray.size)
-    val dpRightBound = IntArray(newHeightArray.size)
-    dpLeftBound[0] = 0
-    dpRightBound[0] = 0
-    dpLeftBound[dpLeftBound.size - 1] = dpLeftBound.size - 1
-    dpRightBound[dpRightBound.size - 1] = dpRightBound.size - 1
-    for (i in 0 until newHeightArray.size) {
-        if (newHeightArray[i] <= 0) continue
-        // 找到左界
-        var leftBoundTemp = i - 1
-        while (newHeightArray[leftBoundTemp] >= newHeightArray[i]) {
-            leftBoundTemp = dpLeftBound[leftBoundTemp]
-        }
-        dpLeftBound[i] = leftBoundTemp
-    }
-    for (i in newHeightArray.size - 1 downTo 0) {
-        if (newHeightArray[i] <= 0) continue
-        // 找到右界
-        var rightBoundTemp = i + 1
-        while (newHeightArray[rightBoundTemp] >= newHeightArray[i]) {
-            rightBoundTemp = dpRightBound[rightBoundTemp]
-        }
-        dpRightBound[i] = rightBoundTemp
-    }
-    var result = 0
-    // 遍历出最大矩形
-    for (i in 1 until newHeightArray.size - 1) {
-        if (newHeightArray[i] <= 0) continue
-        val rectArea = (dpRightBound[i] - dpLeftBound[i] - 1) * newHeightArray[i]
-        result = Math.max(result, rectArea)
-    }
-    return result
-}
-
 fun largestOddNumber(num: String): String {
     val array = num.toCharArray()
     for (i in array.size - 1 downTo 0) {
@@ -819,39 +762,6 @@ fun largestOddNumber(num: String): String {
         }
     }
     return ""
-}
-
-fun racecar(target: Int): Int {
-    val dp = IntArray(target + 1) { Int.MAX_VALUE }
-    for (tempTarget in 1..target) {
-        var ANum = 1
-        var forwardDistance = 0
-        var minStep = Int.MAX_VALUE
-        // 2 * tempTarget : 也就最多先到 2倍目标地，往回走 （极限可能，走到两倍目标地，再走一半回来，和直接过去一半距离一样）
-        while (((1 shl ANum) - 1).also { forwardDistance = it } <= 2 * tempTarget) {
-            when {
-                forwardDistance == tempTarget -> {
-                    minStep = Math.min(minStep, ANum)
-                }
-                forwardDistance > tempTarget -> {
-                    minStep = Math.min(minStep, ANum + 1 + dp[forwardDistance - tempTarget])
-                }
-                forwardDistance < tempTarget -> {
-                    for (RNum in 0 until ANum) {
-                        // RNum == 0 : 倒车后没有行驶，又反向
-                        val backDistance = (1 shl RNum) - 1
-                        minStep = Math.min(
-                            minStep,
-                            ANum + 1 + RNum + 1 + dp[tempTarget - forwardDistance + backDistance]
-                        )
-                    }
-                }
-            }
-            dp[tempTarget] = minStep
-            ANum++
-        }
-    }
-    return dp[target]
 }
 
 fun climbStairs(n: Int): Int {
@@ -917,105 +827,125 @@ fun minPathSum(grid: Array<IntArray>): Int {
     return grid[m - 1][n - 1]
 }
 
-
-fun maxProfit(prices: IntArray): Int {
-    var minPrice = Int.MAX_VALUE
-    var sale = 0
-    prices.forEach {
-        minPrice = Math.min(minPrice, it)
-        sale = Math.max(sale, it - minPrice)
-    }
-    return sale
-}
-
-fun wonderfulSubstrings(word: String): Long {
-    if (word.length <= 1) return word.length.toLong()
-    // 暴力法
-    // 枚举所有以 i 开头的子字符串，查看是否是 “最美”
-    val words = word.toCharArray()
-    var perfectNum = 0L
-    // dp[i][j] : i 起点，j 结束 => 奇数数量  dp[i][j] = 如果 dp[i][j-1]奇数数量为0 ,
-    // 如果 为1，就要去计算
-    val dp = Array(words.size) { LongArray(words.size) }
-    for (i in words.indices) {
-        dp[i][i] = 1
-    }
-    for (i in words.indices) {
-        for (j in i until words.size) {
-            if (j - 1 >= 0 && dp[i][j - 1] == 0L) {
-                dp[i][j] = 1
-            } else {
-                dp[i][j] = checkIsPerfect(words, i, j)
-            }
-            if (dp[i][j] <= 1) {
-                perfectNum++
-            }
+fun maximalRectangle(matrix: Array<CharArray>): Int {
+    if (matrix.isEmpty()) return 0
+    val heightMatrix = Array(matrix.size) { IntArray(matrix[0].size) }
+    for (i in matrix.indices)
+        for (j in matrix[i].indices) {
+            val value = matrix[i][j] - '0'
+            if (value == 0) continue
+            heightMatrix[i][j] = if (i == 0) value else value + heightMatrix[i - 1][j]
         }
+    var result = 0
+    for (i in heightMatrix.indices) {
+        result = Math.max(result, getMaximalRectangle(heightMatrix[i]))
     }
-    return perfectNum
+    return result
 }
 
-fun checkIsPerfect(words: CharArray, start: Int, end: Int): Long {
-    val counter = IntArray(10)
-    for (i in start..end) {
-        counter[words[i] - 'a']++
-    }
-    var oddNum = 0L
-    for (i in counter.indices) {
-        if (counter[i] and 1 == 1) {
-            oddNum++
+private fun getMaximalRectangle(heightArray: IntArray): Int {
+    // 找出柱状图中最大矩形
+    // 单调递增栈 哨兵法
+    val stack = Stack<Int>()
+    val newHeightArray = IntArray(heightArray.size + 2)
+    heightArray.copyInto(newHeightArray, 1)
+    newHeightArray[0] = -1
+    newHeightArray[newHeightArray.size - 1] = -1
+    stack.push(0)
+    var maxArea = 0
+    for (i in 1 until newHeightArray.size) {
+        while (newHeightArray[i] < newHeightArray[stack.peek()]) {
+            val peek = stack.peek()
+            stack.pop()
+            // 确定右界
+            val right = i
+            val left = stack.peek()
+            val area = (right - left - 1) * newHeightArray[peek]
+            maxArea = Math.max(area, maxArea)
         }
+        stack.push(i)
     }
-    return oddNum
+    return maxArea
 }
-
 
 fun relativeSortArray(arr1: IntArray, arr2: IntArray): IntArray {
-    val sparseArray = HashMap<Int, Int>()
+    // 计数排序
+    var maxValue = -1
+    for (item in arr1) {
+        maxValue = Math.max(maxValue, item)
+    }
+    val counter = IntArray(maxValue + 1)
+    arr1.forEach {
+        counter[it]++
+    }
+    val res = LinkedList<Int>()
+    // 相对顺序的先输出
     arr2.forEach {
-        sparseArray[it] = 0
-    }
-    val list = arr1.toMutableList()
-    val needSortList = LinkedList<Int>()
-    list.forEach {
-        if (sparseArray.containsKey(it)) {
-            sparseArray[it] = sparseArray[it]!! + 1
-        } else {
-            needSortList.add(it)
+        // 注意 repeat () { it 是指索引 }
+        repeat(counter[it]) { index ->
+            res.add(it)
         }
+        counter[it] = 0
     }
-    val result = LinkedList<Int>()
-    arr2.forEach { item ->
-        if (sparseArray.containsKey(item)) {
-            repeat(sparseArray[item]!!) { _ ->
-                result.add(item)
-            }
+    // 剩余的输出
+    for (i in counter.indices) {
+        repeat(counter[i]) { index ->
+            res.add(i)
         }
+        counter[i] = 0
     }
-    needSortList.sort()
-    result.addAll(needSortList)
-    return result.toIntArray()
+    return res.toIntArray()
 }
 
 fun merge(intervals: Array<IntArray>): Array<IntArray> {
-    intervals.sortWith(kotlin.Comparator { o1, o2 ->
-        if (o1[0] == o2[0]) {
-            o2[1] - o1[1]
+    intervals.sortWith(kotlin.Comparator { o1, o2 -> o1[0] - o2[0] })
+    val merger = mutableListOf<IntArray>()
+    for (i in intervals.indices) {
+        if (i == 0 || intervals[i][0] > merger.last()[1]) {
+            // 没法合并
+            merger.add(intervals[i])
         } else {
-            o2[0] - o1[0]
+            // 合并
+            merger.last()[1] = Math.max(intervals[i][1], merger.last()[1])
         }
-    })
-    var index = 1
-    var lastArray = intArrayOf(intervals[0][0], intervals[0][1])
-    val result = ArrayList<IntArray>()
-    while (index in intervals.indices) {
-        if (lastArray[1] >= intervals[index][1] || intervals[index][0] <= lastArray[0]) {
-            lastArray[1] = Math.max(lastArray[1], intervals[index][1])
-            index += 2
-        } else {
-            index++
-        }
-        result.add(lastArray)
     }
-    return result.toTypedArray()
+    return merger.toTypedArray()
 }
+
+fun racecar(target: Int): Int {
+    val dp = IntArray(target + 1) { Int.MAX_VALUE }
+    for (i in 1..target) {
+        // 逐步求出每一个距离所用的最小步数
+        // A 指令次数
+        var ANum = 1
+        var distance = 0
+        var minStep = Int.MAX_VALUE
+        while (getDistance(ANum).also { distance = it } <= 2 * i) {
+            // 抵达目标只有几种情况：
+            // 1. 直接 Anum 抵达
+            // 2. 超过目标退回
+            // 3. 在目标前先前进后退调整后在前进抵达
+            when {
+                // 相等时，直接通过 n 个 Anum 抵达，步数为 n
+                distance == i -> minStep = Math.min(minStep, ANum)
+                // 超过时，通过往回走 distance - i 距离抵达，步数为 Anum + 1 个转向 + dp[distance - i]( distance - i 距离 最小步数)
+                distance > i -> minStep = Math.min(minStep, ANum + 1 + dp[distance - i])
+                // 前进还没到先选择后退了
+                distance < i -> {
+                    // 后退的步子肯定要少于前进步子，否则白走
+                    for (RNum in 0 until ANum) {
+                        minStep = Math.min(
+                            minStep,
+                            ANum + 1 + RNum + 1 + dp[i - distance + getDistance(RNum)]
+                        )
+                    }
+                }
+            }
+            dp[i] = minStep
+            ANum++
+        }
+    }
+    return dp[target]
+}
+
+fun getDistance(step: Int) = (1 shl step) - 1
