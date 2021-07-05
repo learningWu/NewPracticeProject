@@ -1,7 +1,5 @@
 package com.chulan.newtestproject
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.ArrayList
@@ -91,66 +89,66 @@ internal class Trie
         return node
     }
 }
-
-fun solveNQueens(n: Int): List<List<String>> {
-    // 把皇后放到一个空位，校验是否可以，可以进入下一层，下一层返回ok就成功，否则清除当前皇后，尝试下一个可放置的皇后位置
-    // 构建棋盘
-    val matrix = Array(n) { CharArray(n) { '.' } }
-    solve(matrix)
-    return result
-}
-
-val visited = HashSet<Int>()
-val result = LinkedList<LinkedList<String>>()
-fun solve(matrix: Array<CharArray>): Boolean {
-    for (i in matrix.indices)
-        for (j in matrix[i].indices) {
-            if (!visited.contains(i * matrix[0].size + j) && matrix[i][j] == '.') {
-                visited.add(i * matrix[0].size + j)
-                // 空地可以下皇后
-                if (isValidQueen(i, j, matrix)) {
-                    matrix[i][j] = 'Q'
-                    if (solve(matrix)) {
-                        printChessBoardString(matrix)
-                        return true
-                    }
-                    matrix[i][j] = '.'
-                }
-            }
-        }
-    return false
-}
-
-fun printChessBoardString(matrix: Array<CharArray>) {
-    val linkedList = LinkedList<String>()
-    for (i in matrix.indices) {
-        linkedList.add(matrix[i].joinToString { it.toString() })
-    }
-    result.add(linkedList)
-}
-
-val xPieNa = intArrayOf(1, 1, -1, -1)
-val yPieNa = intArrayOf(1, -1, 1, -1)
-
-fun isValidQueen(i: Int, j: Int, matrix: Array<CharArray>): Boolean {
-    var result = true
-    // i 行有皇后
-    if (matrix[i].contains('Q')) result = false
-    // j 列有皇后
-    for (k in matrix.indices) {
-        if (matrix[k][j] == 'Q')
-            result = false
-    }
-    // 斜线
-    for (k in xPieNa) {
-        val xDir = i + xPieNa[k]
-        val yDir = j + yPieNa[k]
-        if (assertXYValid(xDir, yDir, arrayOf(matrix)) { matrix[xDir][yDir] == 'Q' }) {
-            result = false
-        }
-    }
-    return result
-}
+//
+//fun solveNQueens(n: Int): List<List<String>> {
+//    // 把皇后放到一个空位，校验是否可以，可以进入下一层，下一层返回ok就成功，否则清除当前皇后，尝试下一个可放置的皇后位置
+//    // 构建棋盘
+//    val matrix = Array(n) { CharArray(n) { '.' } }
+//    solve(matrix)
+//    return result
+//}
+//
+//val visited = HashSet<Int>()
+//val result = LinkedList<LinkedList<String>>()
+//fun solve(matrix: Array<CharArray>): Boolean {
+//    for (i in matrix.indices)
+//        for (j in matrix[i].indices) {
+//            if (!visited.contains(i * matrix[0].size + j) && matrix[i][j] == '.') {
+//                visited.add(i * matrix[0].size + j)
+//                // 空地可以下皇后
+//                if (isValidQueen(i, j, matrix)) {
+//                    matrix[i][j] = 'Q'
+//                    if (solve(matrix)) {
+//                        printChessBoardString(matrix)
+//                        return true
+//                    }
+//                    matrix[i][j] = '.'
+//                }
+//            }
+//        }
+//    return false
+//}
+//
+//fun printChessBoardString(matrix: Array<CharArray>) {
+//    val linkedList = LinkedList<String>()
+//    for (i in matrix.indices) {
+//        linkedList.add(matrix[i].joinToString { it.toString() })
+//    }
+//    result.add(linkedList)
+//}
+//
+//val xPieNa = intArrayOf(1, 1, -1, -1)
+//val yPieNa = intArrayOf(1, -1, 1, -1)
+//
+//fun isValidQueen(i: Int, j: Int, matrix: Array<CharArray>): Boolean {
+//    var result = true
+//    // i 行有皇后
+//    if (matrix[i].contains('Q')) result = false
+//    // j 列有皇后
+//    for (k in matrix.indices) {
+//        if (matrix[k][j] == 'Q')
+//            result = false
+//    }
+//    // 斜线
+//    for (k in xPieNa) {
+//        val xDir = i + xPieNa[k]
+//        val yDir = j + yPieNa[k]
+//        if (assertXYValid(xDir, yDir, arrayOf(matrix)) { matrix[xDir][yDir] == 'Q' }) {
+//            result = false
+//        }
+//    }
+//    return result
+//}
 
 fun assertXYValid(x: Int, y: Int, matrix: Array<Array<*>>, block: () -> Boolean): Boolean {
     var result = false
@@ -949,3 +947,75 @@ fun racecar(target: Int): Int {
 }
 
 fun getDistance(step: Int) = (1 shl step) - 1
+
+private val resultBoards = ArrayList<ArrayList<String>>()
+fun solveNQueens(n: Int): List<List<String>> {
+    // 每一行的每个格子都放入皇后。延伸状态树找到所有可用组合
+
+    // 每一行的哪个列放入皇后
+    val queens = IntArray(n){ -1 }
+    val columnSet = HashSet<Int>()
+    val pieSet = HashSet<Int>()
+    val naSet = HashSet<Int>()
+    recursiveAndBackSolve(queens, 0, n, columnSet, pieSet, naSet)
+    return resultBoards
+}
+
+fun recursiveAndBackSolve(
+    queens: IntArray,
+    m: Int,
+    n: Int,
+    columnSet: java.util.HashSet<Int>,
+    pieSet: java.util.HashSet<Int>,
+    naSet: java.util.HashSet<Int>
+) {
+    if (m == n) {
+        // queens solution OK
+        resultBoards.add(genBoard(queens, n))
+        return
+    }
+    for (i in 0 until n){
+        // 尝试每一列放入
+
+        if (columnSet.contains(i)){
+            // 此列已有，不可放入
+            continue
+        }
+        // pie 同一条pie线，行 + 列 相等
+        val pieValue = m + i
+        if (pieSet.contains(pieValue)){
+            // pie 已有
+            continue
+        }
+        // na 同一条na线，行 - 列 相等
+        val naValue = m - i
+        if (naSet.contains(naValue)){
+            // na 已有
+            continue
+        }
+        // 放入皇后
+        queens[m] = i
+        // 记录攻击规则
+        columnSet.add(i)
+        pieSet.add(pieValue)
+        naSet.add(naValue)
+        // 下沉 ：下一行 m + 1
+        recursiveAndBackSolve(queens, m + 1, n, columnSet, pieSet, naSet)
+        // 还原场景
+        queens[m] = -1
+        columnSet.remove(i)
+        pieSet.remove(pieValue)
+        naSet.remove(naValue)
+    }
+}
+
+private fun genBoard(queens: IntArray, n: Int): ArrayList<String> {
+    val solution = arrayListOf<String>()
+    for (i in 0 until n) {
+        val row = CharArray(n)
+        row.fill('.')
+        row[queens[i]] = 'Q'
+        solution.add(row.joinToString(""))
+    }
+    return solution
+}
