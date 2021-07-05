@@ -954,58 +954,39 @@ fun solveNQueens(n: Int): List<List<String>> {
 
     // 每一行的哪个列放入皇后
     val queens = IntArray(n){ -1 }
-    val columnSet = HashSet<Int>()
-    val pieSet = HashSet<Int>()
-    val naSet = HashSet<Int>()
-    recursiveAndBackSolve(queens, 0, n, columnSet, pieSet, naSet)
+    recursiveAndBackSolve(queens, 0, n, 0, 0, 0)
     return resultBoards
 }
 
+/**
+ * @param column 会被皇后攻击的列
+ * @param pie 会被皇后攻击的 pie
+ * @param na 会被皇后攻击的 na
+ */
 fun recursiveAndBackSolve(
     queens: IntArray,
     m: Int,
     n: Int,
-    columnSet: java.util.HashSet<Int>,
-    pieSet: java.util.HashSet<Int>,
-    naSet: java.util.HashSet<Int>
+    column: Int,
+    pie: Int,
+    na: Int
 ) {
     if (m == n) {
         // queens solution OK
         resultBoards.add(genBoard(queens, n))
         return
     }
-    for (i in 0 until n){
-        // 尝试每一列放入
-
-        if (columnSet.contains(i)){
-            // 此列已有，不可放入
-            continue
-        }
-        // pie 同一条pie线，行 + 列 相等
-        val pieValue = m + i
-        if (pieSet.contains(pieValue)){
-            // pie 已有
-            continue
-        }
-        // na 同一条na线，行 - 列 相等
-        val naValue = m - i
-        if (naSet.contains(naValue)){
-            // na 已有
-            continue
-        }
-        // 放入皇后
-        queens[m] = i
-        // 记录攻击规则
-        columnSet.add(i)
-        pieSet.add(pieValue)
-        naSet.add(naValue)
-        // 下沉 ：下一行 m + 1
-        recursiveAndBackSolve(queens, m + 1, n, columnSet, pieSet, naSet)
-        // 还原场景
+    // ( 1 shl n ) - 1 : 第 0 .. n-1 位为1 （n 个 1）
+    var availablePoi = ( 1 shl n ) - 1 and (column or pie or na).inv()
+    while (availablePoi != 0) {
+        // x and (−x) 可以获得 xx 的二进制表示中的最低位的 1 的位置
+        val poi = availablePoi and -availablePoi
+        // 打掉最低位1
+        availablePoi = availablePoi and (availablePoi - 1)
+        queens[m] = counter1(poi - 1)
+        // 不可摆放的位置
+        recursiveAndBackSolve(queens, m + 1, n, column or poi, (pie or poi) shl 1, (na or poi) shr 1)
         queens[m] = -1
-        columnSet.remove(i)
-        pieSet.remove(pieValue)
-        naSet.remove(naValue)
     }
 }
 
@@ -1018,4 +999,51 @@ private fun genBoard(queens: IntArray, n: Int): ArrayList<String> {
         solution.add(row.joinToString(""))
     }
     return solution
+}
+
+fun counter1(n: Int): Int {
+    // 方法 1 ：将末尾 1 打掉。直到数值为0
+    var value = n
+    var count = 0
+    while (value != 0) {
+        count++
+        value = value and value - 1
+    }
+    return count
+}
+
+private var count = 0
+fun totalNQueens(n: Int): Int {
+    recursiveAndBack(0, n, 0, 0, 0)
+    return count
+}
+
+
+/**
+ * @param column 会被皇后攻击的列
+ * @param pie 会被皇后攻击的 pie
+ * @param na 会被皇后攻击的 na
+ */
+fun recursiveAndBack(
+    m: Int,
+    n: Int,
+    column: Int,
+    pie: Int,
+    na: Int
+) {
+    if (m == n) {
+        // queens solution OK
+        count++
+        return
+    }
+    // ( 1 shl n ) - 1 : 第 0 .. n-1 位为1 （n 个 1）
+    var availablePoi = ( 1 shl n ) - 1 and (column or pie or na).inv()
+    while (availablePoi != 0) {
+        // x and (−x) 可以获得 xx 的二进制表示中的最低位的 1 的位置
+        val poi = availablePoi and -availablePoi
+        // 打掉最低位1
+        availablePoi = availablePoi and (availablePoi - 1)
+        // 不可摆放的位置
+        recursiveAndBack(m + 1, n, column or poi, (pie or poi) shl 1, (na or poi) shr 1)
+    }
 }
