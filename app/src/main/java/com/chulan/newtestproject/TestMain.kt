@@ -948,102 +948,29 @@ fun racecar(target: Int): Int {
 
 fun getDistance(step: Int) = (1 shl step) - 1
 
-private val resultBoards = ArrayList<ArrayList<String>>()
-fun solveNQueens(n: Int): List<List<String>> {
-    // 每一行的每个格子都放入皇后。延伸状态树找到所有可用组合
-
-    // 每一行的哪个列放入皇后
-    val queens = IntArray(n){ -1 }
-    recursiveAndBackSolve(queens, 0, n, 0, 0, 0)
-    return resultBoards
-}
-
-/**
- * @param column 会被皇后攻击的列
- * @param pie 会被皇后攻击的 pie
- * @param na 会被皇后攻击的 na
- */
-fun recursiveAndBackSolve(
-    queens: IntArray,
-    m: Int,
-    n: Int,
-    column: Int,
-    pie: Int,
-    na: Int
-) {
-    if (m == n) {
-        // queens solution OK
-        resultBoards.add(genBoard(queens, n))
-        return
-    }
-    // ( 1 shl n ) - 1 : 第 0 .. n-1 位为1 （n 个 1）
-    var availablePoi = ( 1 shl n ) - 1 and (column or pie or na).inv()
-    while (availablePoi != 0) {
-        // x and (−x) 可以获得 xx 的二进制表示中的最低位的 1 的位置
-        val poi = availablePoi and -availablePoi
-        // 打掉最低位1
-        availablePoi = availablePoi and (availablePoi - 1)
-        queens[m] = counter1(poi - 1)
-        // 不可摆放的位置
-        recursiveAndBackSolve(queens, m + 1, n, column or poi, (pie or poi) shl 1, (na or poi) shr 1)
-        queens[m] = -1
-    }
-}
-
-private fun genBoard(queens: IntArray, n: Int): ArrayList<String> {
-    val solution = arrayListOf<String>()
-    for (i in 0 until n) {
-        val row = CharArray(n)
-        row.fill('.')
-        row[queens[i]] = 'Q'
-        solution.add(row.joinToString(""))
-    }
-    return solution
-}
-
-fun counter1(n: Int): Int {
-    // 方法 1 ：将末尾 1 打掉。直到数值为0
-    var value = n
-    var count = 0
-    while (value != 0) {
-        count++
-        value = value and value - 1
-    }
-    return count
-}
-
 private var count = 0
 fun totalNQueens(n: Int): Int {
-    recursiveAndBack(0, n, 0, 0, 0)
+    recursiveSolve(0, n, 0, 0, 0)
     return count
 }
 
-
-/**
- * @param column 会被皇后攻击的列
- * @param pie 会被皇后攻击的 pie
- * @param na 会被皇后攻击的 na
- */
-fun recursiveAndBack(
+fun recursiveSolve(
     m: Int,
     n: Int,
-    column: Int,
-    pie: Int,
-    na: Int
+    columnSet: Int,
+    pieSet: Int,
+    naSet: Int
 ) {
     if (m == n) {
-        // queens solution OK
         count++
         return
     }
-    // ( 1 shl n ) - 1 : 第 0 .. n-1 位为1 （n 个 1）
-    var availablePoi = ( 1 shl n ) - 1 and (column or pie or na).inv()
+    var availablePoi = ( (1 shl n) - 1 ) and ((columnSet or pieSet or naSet).inv())
     while (availablePoi != 0) {
-        // x and (−x) 可以获得 xx 的二进制表示中的最低位的 1 的位置
+        // 负数的补码 = 符号位不变，其它取反，+ 1
         val poi = availablePoi and -availablePoi
-        // 打掉最低位1
         availablePoi = availablePoi and (availablePoi - 1)
-        // 不可摆放的位置
-        recursiveAndBack(m + 1, n, column or poi, (pie or poi) shl 1, (na or poi) shr 1)
+        // 因为二进制 和棋盘方向相反 ：所以 pie 右移，na 左移
+        recursiveSolve(m + 1, n, columnSet or poi , (pieSet or poi) shr 1,(naSet or poi) shl 1 )
     }
 }
