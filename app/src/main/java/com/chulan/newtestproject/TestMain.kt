@@ -1,5 +1,7 @@
 package com.chulan.newtestproject
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.ArrayList
@@ -866,50 +868,6 @@ private fun getMaximalRectangle(heightArray: IntArray): Int {
     return maxArea
 }
 
-fun relativeSortArray(arr1: IntArray, arr2: IntArray): IntArray {
-    // 计数排序
-    var maxValue = -1
-    for (item in arr1) {
-        maxValue = Math.max(maxValue, item)
-    }
-    val counter = IntArray(maxValue + 1)
-    arr1.forEach {
-        counter[it]++
-    }
-    val res = LinkedList<Int>()
-    // 相对顺序的先输出
-    arr2.forEach {
-        // 注意 repeat () { it 是指索引 }
-        repeat(counter[it]) { index ->
-            res.add(it)
-        }
-        counter[it] = 0
-    }
-    // 剩余的输出
-    for (i in counter.indices) {
-        repeat(counter[i]) { index ->
-            res.add(i)
-        }
-        counter[i] = 0
-    }
-    return res.toIntArray()
-}
-
-fun merge(intervals: Array<IntArray>): Array<IntArray> {
-    intervals.sortWith(kotlin.Comparator { o1, o2 -> o1[0] - o2[0] })
-    val merger = mutableListOf<IntArray>()
-    for (i in intervals.indices) {
-        if (i == 0 || intervals[i][0] > merger.last()[1]) {
-            // 没法合并
-            merger.add(intervals[i])
-        } else {
-            // 合并
-            merger.last()[1] = Math.max(intervals[i][1], merger.last()[1])
-        }
-    }
-    return merger.toTypedArray()
-}
-
 fun racecar(target: Int): Int {
     val dp = IntArray(target + 1) { Int.MAX_VALUE }
     for (i in 1..target) {
@@ -965,12 +923,55 @@ fun recursiveSolve(
         count++
         return
     }
-    var availablePoi = ( (1 shl n) - 1 ) and ((columnSet or pieSet or naSet).inv())
+    var availablePoi = ((1 shl n) - 1) and ((columnSet or pieSet or naSet).inv())
     while (availablePoi != 0) {
         // 负数的补码 = 符号位不变，其它取反，+ 1
         val poi = availablePoi and -availablePoi
         availablePoi = availablePoi and (availablePoi - 1)
         // 因为二进制 和棋盘方向相反 ：所以 pie 右移，na 左移
-        recursiveSolve(m + 1, n, columnSet or poi , (pieSet or poi) shr 1,(naSet or poi) shl 1 )
+        recursiveSolve(m + 1, n, columnSet or poi, (pieSet or poi) shr 1, (naSet or poi) shl 1)
     }
+}
+
+fun countBits(n: Int): IntArray {
+    val dp = IntArray(n + 1)
+    for (i in 1..n) {
+        dp[i] = dp[i and i - 1] + 1
+    }
+    return dp
+}
+
+@RequiresApi(Build.VERSION_CODES.N)
+fun relativeSortArray(arr1: IntArray, arr2: IntArray): IntArray {
+    // 储存优先顺序
+    val hashMap = HashMap<Int, Int>()
+    for (i in arr2.indices) {
+        hashMap[arr2[i]] = i
+    }
+    // 使用自定义 comparator 排列 arr1
+    // leetcode 需要写全 (kotlin.Comparator { before, after -> })
+    return arr1.sortedWith(kotlin.Comparator { before, after ->
+        if (hashMap.containsKey(before) || hashMap.containsKey(after)) {
+            // 没取到的给 1001 ，排到最后 (题目定义不超过 1000)
+            hashMap.getOrDefault(before, 1001) - hashMap.getOrDefault(after, 1001)
+        } else {
+            before - after
+        }
+    }).toIntArray()
+}
+
+fun merge(intervals: Array<IntArray>): Array<IntArray> {
+    intervals.sortWith(kotlin.Comparator { o1, o2 ->
+        o1[0] - o2[0]
+    })
+    val merger = arrayListOf<IntArray>()
+    for (i in intervals.indices) {
+        if (merger.isEmpty() || merger.last()[1] < intervals[i][0]) {
+            // 左边超过前一个的右边，不可合并
+            merger.add(intArrayOf(intervals[i][0], intervals[i][1]))
+        } else {
+            merger.last()[1] = Math.max(merger.last()[1], intervals[i][1])
+        }
+    }
+    return merger.toTypedArray()
 }
