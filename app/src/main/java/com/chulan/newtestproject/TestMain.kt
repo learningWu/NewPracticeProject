@@ -975,3 +975,116 @@ fun merge(intervals: Array<IntArray>): Array<IntArray> {
     }
     return merger.toTypedArray()
 }
+
+
+val arrayX = arrayOf(1, 0, -1, 0, 1, -1, 1, -1)
+val arrayY = arrayOf(1, 1, -1, -1, 0, 0, -1, 1)
+val visited = HashSet<Int>()
+fun shortestPathBinaryMatrix(grid: Array<IntArray>): Int {
+    // 从8个方向扩散
+    // 经过途径标记 visited ，回溯时移除
+    // 求广度优先遍历 最小层数
+    val columns = grid[0].size
+    val rows = grid.size
+    if (grid[rows - 1][columns - 1] == 1 || grid[0][0] == 1) {
+        return -1
+    }
+    val maxIndex = rows * columns - 1
+    val queue = LinkedList<Int>()
+    queue.offer(0)
+    var counterLevel = 0
+    while (queue.isNotEmpty()) {
+        counterLevel++
+        repeat(queue.size) {
+            queue.poll()?.let {
+                if (it == maxIndex) {
+                    // 摸到右下角
+                    return counterLevel
+                }
+
+                // 第几行
+                val i = it / columns
+                // 第几列
+                val j = it % columns
+                for (k in arrayX.indices) {
+                    val nextI = i + arrayX[k]
+                    val nextJ = j + arrayY[k]
+                    val nextPoi = nextI * columns + nextJ
+                    if (nextI in 0 until rows && nextJ in 0 until columns && grid[nextI][nextJ] == 0 && !visited.contains(
+                            nextPoi
+                        )
+                    ) {
+                        visited.add(nextPoi)
+                        queue.offer(nextPoi)
+                    }
+                }
+            }
+        }
+    }
+    return -1
+}
+
+fun countTriples(n: Int): Int {
+    var counter = 0
+    for (a in 1..n)
+        for (b in a..n)
+            for (c in b..n) {
+                if (a * a + b * b == c * c) {
+                    // 找到组合
+                    if (a == b) {
+                        counter++
+                    } else {
+                        counter += 2
+                    }
+                }
+            }
+    return counter
+}
+
+private val canAvailable = arrayOf(
+    intArrayOf(1, 3),
+    intArrayOf(0, 2, 4),
+    intArrayOf(1, 5),
+    intArrayOf(0, 4),
+    intArrayOf(3, 1, 5),
+    intArrayOf(4, 2)
+)
+
+private val visitedSet = HashSet<String>()
+fun slidingPuzzle(board: Array<IntArray>): Int {
+    // BFS 状态树 扩散最短路径
+    // 找到起点 0
+    val boardStr = board[0].joinToString("") + board[1].joinToString("")
+    val queue = LinkedList<String>()
+    queue.offer(boardStr)
+    var step = 0
+    while (queue.isNotEmpty()) {
+        repeat(queue.size) {
+            queue.poll()?.let {
+                visitedSet.add(it)
+                if (it == "123450") {
+                    return step
+                }
+                val boardArray = boardStr.toCharArray()
+                val indexZero = boardArray.indexOf('0')
+                var newStr: String
+                for (direction in canAvailable[indexZero]) {
+                    // 交换
+                    boardArray[indexZero] = boardArray[direction].apply {
+                        boardArray[direction] = boardArray[indexZero]
+                    }
+                    newStr = boardArray.joinToString("")
+                    if (!visitedSet.contains(newStr)) {
+                        queue.offer(newStr)
+                    }
+                    // 还原
+                    boardArray[indexZero] = boardArray[direction].apply {
+                        boardArray[direction] = boardArray[indexZero]
+                    }
+                }
+            }
+        }
+        step++
+    }
+    return -1
+}
