@@ -38,7 +38,7 @@ fun main() {
         intArrayOf(15, 18)
     )
 
-    relativeSortArray(intArrayOf(2, 3, 1, 3, 2, 4, 6, 7, 9, 2, 19), intArrayOf(2, 1, 4, 3, 9, 6))
+    solveNQueens(8)
 }
 
 internal class Trie
@@ -91,75 +91,6 @@ internal class Trie
         return node
     }
 }
-//
-//fun solveNQueens(n: Int): List<List<String>> {
-//    // 把皇后放到一个空位，校验是否可以，可以进入下一层，下一层返回ok就成功，否则清除当前皇后，尝试下一个可放置的皇后位置
-//    // 构建棋盘
-//    val matrix = Array(n) { CharArray(n) { '.' } }
-//    solve(matrix)
-//    return result
-//}
-//
-//val visited = HashSet<Int>()
-//val result = LinkedList<LinkedList<String>>()
-//fun solve(matrix: Array<CharArray>): Boolean {
-//    for (i in matrix.indices)
-//        for (j in matrix[i].indices) {
-//            if (!visited.contains(i * matrix[0].size + j) && matrix[i][j] == '.') {
-//                visited.add(i * matrix[0].size + j)
-//                // 空地可以下皇后
-//                if (isValidQueen(i, j, matrix)) {
-//                    matrix[i][j] = 'Q'
-//                    if (solve(matrix)) {
-//                        printChessBoardString(matrix)
-//                        return true
-//                    }
-//                    matrix[i][j] = '.'
-//                }
-//            }
-//        }
-//    return false
-//}
-//
-//fun printChessBoardString(matrix: Array<CharArray>) {
-//    val linkedList = LinkedList<String>()
-//    for (i in matrix.indices) {
-//        linkedList.add(matrix[i].joinToString { it.toString() })
-//    }
-//    result.add(linkedList)
-//}
-//
-//val xPieNa = intArrayOf(1, 1, -1, -1)
-//val yPieNa = intArrayOf(1, -1, 1, -1)
-//
-//fun isValidQueen(i: Int, j: Int, matrix: Array<CharArray>): Boolean {
-//    var result = true
-//    // i 行有皇后
-//    if (matrix[i].contains('Q')) result = false
-//    // j 列有皇后
-//    for (k in matrix.indices) {
-//        if (matrix[k][j] == 'Q')
-//            result = false
-//    }
-//    // 斜线
-//    for (k in xPieNa) {
-//        val xDir = i + xPieNa[k]
-//        val yDir = j + yPieNa[k]
-//        if (assertXYValid(xDir, yDir, arrayOf(matrix)) { matrix[xDir][yDir] == 'Q' }) {
-//            result = false
-//        }
-//    }
-//    return result
-//}
-
-fun assertXYValid(x: Int, y: Int, matrix: Array<Array<*>>, block: () -> Boolean): Boolean {
-    var result = false
-    if (x in matrix.indices && y in matrix[x].indices) {
-        result = block()
-    }
-    return result
-}
-
 
 class UnionFind(var n: Int) {
     var count = 0
@@ -976,54 +907,6 @@ fun merge(intervals: Array<IntArray>): Array<IntArray> {
     return merger.toTypedArray()
 }
 
-
-val arrayX = arrayOf(1, 0, -1, 0, 1, -1, 1, -1)
-val arrayY = arrayOf(1, 1, -1, -1, 0, 0, -1, 1)
-val visited = HashSet<Int>()
-fun shortestPathBinaryMatrix(grid: Array<IntArray>): Int {
-    // 从8个方向扩散
-    // 经过途径标记 visited ，回溯时移除
-    // 求广度优先遍历 最小层数
-    val columns = grid[0].size
-    val rows = grid.size
-    if (grid[rows - 1][columns - 1] == 1 || grid[0][0] == 1) {
-        return -1
-    }
-    val maxIndex = rows * columns - 1
-    val queue = LinkedList<Int>()
-    queue.offer(0)
-    var counterLevel = 0
-    while (queue.isNotEmpty()) {
-        counterLevel++
-        repeat(queue.size) {
-            queue.poll()?.let {
-                if (it == maxIndex) {
-                    // 摸到右下角
-                    return counterLevel
-                }
-
-                // 第几行
-                val i = it / columns
-                // 第几列
-                val j = it % columns
-                for (k in arrayX.indices) {
-                    val nextI = i + arrayX[k]
-                    val nextJ = j + arrayY[k]
-                    val nextPoi = nextI * columns + nextJ
-                    if (nextI in 0 until rows && nextJ in 0 until columns && grid[nextI][nextJ] == 0 && !visited.contains(
-                            nextPoi
-                        )
-                    ) {
-                        visited.add(nextPoi)
-                        queue.offer(nextPoi)
-                    }
-                }
-            }
-        }
-    }
-    return -1
-}
-
 fun countTriples(n: Int): Int {
     var counter = 0
     for (a in 1..n)
@@ -1087,4 +970,90 @@ fun slidingPuzzle(board: Array<IntArray>): Int {
         step++
     }
     return -1
+}
+
+val arrayX = arrayOf(1, 0, -1, 0, 1, -1, 1, -1)
+val arrayY = arrayOf(1, 1, -1, -1, 0, 0, -1, 1)
+fun shortestPathBinaryMatrix(grid: Array<IntArray>): Int {
+    val rows = grid.size
+    val columns = grid[0].size
+    if (grid[0][0] == 1 || grid[rows - 1][columns - 1] == 1) {
+        return -1
+    }
+    val queue = LinkedList<Int>()
+    queue.offer(0)
+    var path = 1
+    while (queue.isNotEmpty()) {
+        repeat(queue.size) {
+            queue.poll()?.let {
+                if (it == rows * columns - 1) {
+                    return path
+                }
+                val i = it / columns
+                val j = it % columns
+                for (k in arrayX.indices) {
+                    val nextI = i + arrayX[k]
+                    val nextJ = j + arrayY[k]
+                    if (nextI in 0 until rows && nextJ in 0 until columns && grid[nextI][nextJ] == 0) {
+                        queue.offer(nextI * columns + nextJ)
+                        grid[nextI][nextJ] = 1
+                    }
+                }
+            }
+        }
+        path++
+    }
+    return -1
+}
+
+private val resultSolves = LinkedList<LinkedList<String>>()
+fun solveNQueens(n: Int): List<List<String>> {
+    solveQueen(IntArray(n) { -1 }, n, 0, 0, 0, 0)
+    return resultSolves
+}
+
+/**
+ * @param column 整型，其中位为 1 的不可放置
+ * @param pie    整型，其中位为 1 的不可放置
+ * @param na     整型，其中位为 1 的不可放置
+ */
+fun solveQueen(
+    queen: IntArray,
+    n: Int,
+    m: Int,
+    column: Int,
+    pie: Int,
+    na: Int
+) {
+    if (m == n) {
+        genBoard(queen)
+        return
+    }
+    // 得到可放置部分：availablePoi 中为 1 即可放置
+    var availablePoi = ( (1 shl n) - 1 ) and (column or pie or na).inv()
+    while (availablePoi != 0) {
+        // 一个数和自己的负数相与 = 只有最后一个 1 的整型数值
+        val onlyOneValue = availablePoi and (-availablePoi)
+        // 打掉最后一个1
+        availablePoi = availablePoi and (availablePoi - 1)
+        // 1的位置：二进制与棋盘位置相反
+        val targetPoi = Integer.bitCount(onlyOneValue - 1)
+        queen[m] = targetPoi
+        // column or targetPoi : 增加 targetPoi 为 列不可放置
+        // (pie or targetPoi) shr 1 : pie 不可放置
+        // (na or targetPoi) shl 1 : pie 不可放置
+        // 棋盘与二进制相反，所以 pie 是位右移， na 是位左移
+        solveQueen(queen, n, m + 1, column or onlyOneValue, (pie or onlyOneValue) shr 1, (na or onlyOneValue) shl 1)
+        queen[m] = -1
+    }
+}
+
+fun genBoard(queen: IntArray) {
+    val result = LinkedList<String>()
+    for (i in queen.indices) {
+        val row = CharArray(queen.size){ '.' }
+        row[queen[i]] = 'Q'
+        result.add(row.joinToString(""))
+    }
+    resultSolves.add(result)
 }
