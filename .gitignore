@@ -14,3 +14,4 @@
 .cxx
 local.properties
 /.idea/leetcode/editor.xml
+.idea/deploymentTargetDropDown.xml

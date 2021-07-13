@@ -8,6 +8,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
+@RequiresApi(Build.VERSION_CODES.N)
 fun main() {
 //    val array = Array(4) { CharArray(5) }
 //    array[0] = charArrayOf('1', '1', '1', '1', '0')
@@ -38,7 +39,7 @@ fun main() {
         intArrayOf(15, 18)
     )
 
-    solveNQueens(8)
+    slidingPuzzle(arrayOf(intArrayOf(3,2,4), intArrayOf(1,5,0)))
 }
 
 internal class Trie
@@ -934,21 +935,22 @@ private val canAvailable = arrayOf(
 )
 
 private val visitedSet = HashSet<String>()
+@RequiresApi(Build.VERSION_CODES.N)
 fun slidingPuzzle(board: Array<IntArray>): Int {
     // BFS 状态树 扩散最短路径
     // 找到起点 0
     val boardStr = board[0].joinToString("") + board[1].joinToString("")
-    val queue = LinkedList<String>()
-    queue.offer(boardStr)
-    var step = 0
+    val queue = PriorityQueue<AStar>(kotlin.Comparator<AStar> { o1, o2 ->
+        o1.f - o2.f
+    })
+    queue.offer(AStar(boardStr,0))
     while (queue.isNotEmpty()) {
-        repeat(queue.size) {
             queue.poll()?.let {
-                visitedSet.add(it)
-                if (it == "123450") {
-                    return step
+                visitedSet.add(it.status)
+                if (it.status == "123450") {
+                    return it.level
                 }
-                val boardArray = boardStr.toCharArray()
+                val boardArray = it.status.toCharArray()
                 val indexZero = boardArray.indexOf('0')
                 var newStr: String
                 for (direction in canAvailable[indexZero]) {
@@ -958,7 +960,7 @@ fun slidingPuzzle(board: Array<IntArray>): Int {
                     }
                     newStr = boardArray.joinToString("")
                     if (!visitedSet.contains(newStr)) {
-                        queue.offer(newStr)
+                        queue.offer(AStar(newStr,it.level + 1))
                     }
                     // 还原
                     boardArray[indexZero] = boardArray[direction].apply {
@@ -966,10 +968,43 @@ fun slidingPuzzle(board: Array<IntArray>): Int {
                     }
                 }
             }
-        }
-        step++
     }
     return -1
+}
+
+/**
+ * @param level BFS 层数
+ * @param distance 曼哈顿距离
+ */
+class AStar(var status: String, var level: Int) {
+    var f = 0
+    var distance = 0
+    // 曼哈顿距离
+    val dist = arrayOf(
+        intArrayOf(0, 1, 2, 1, 2, 3),
+        intArrayOf(1, 0, 1, 2, 1, 2),
+        intArrayOf(2, 1, 0, 3, 2, 1),
+        intArrayOf(1, 2, 3, 0, 1, 2),
+        intArrayOf(2, 1, 2, 1, 0, 1),
+        intArrayOf(3, 2, 1, 2, 1, 0)
+    )
+
+    init {
+        distance = getD()
+        // 层数越少 + 曼哈顿距离越小 的越优先
+        f = level + distance
+    }
+
+    private fun getD():Int {
+        var result = 0
+        for (i in 0 until 6) {
+            // 只要其他 5 个的都在原位，自然就是结果，距离就是 0。所以可以忽略 0 的位置
+            if (status[i] != '0') {
+                result += dist[i][status[i] - '1']
+            }
+        }
+        return result
+    }
 }
 
 val arrayX = arrayOf(1, 0, -1, 0, 1, -1, 1, -1)
@@ -1030,7 +1065,7 @@ fun solveQueen(
         return
     }
     // 得到可放置部分：availablePoi 中为 1 即可放置
-    var availablePoi = ( (1 shl n) - 1 ) and (column or pie or na).inv()
+    var availablePoi = ((1 shl n) - 1) and (column or pie or na).inv()
     while (availablePoi != 0) {
         // 一个数和自己的负数相与 = 只有最后一个 1 的整型数值
         val onlyOneValue = availablePoi and (-availablePoi)
@@ -1043,7 +1078,14 @@ fun solveQueen(
         // (pie or targetPoi) shr 1 : pie 不可放置
         // (na or targetPoi) shl 1 : pie 不可放置
         // 棋盘与二进制相反，所以 pie 是位右移， na 是位左移
-        solveQueen(queen, n, m + 1, column or onlyOneValue, (pie or onlyOneValue) shr 1, (na or onlyOneValue) shl 1)
+        solveQueen(
+            queen,
+            n,
+            m + 1,
+            column or onlyOneValue,
+            (pie or onlyOneValue) shr 1,
+            (na or onlyOneValue) shl 1
+        )
         queen[m] = -1
     }
 }
@@ -1051,7 +1093,7 @@ fun solveQueen(
 fun genBoard(queen: IntArray) {
     val result = LinkedList<String>()
     for (i in queen.indices) {
-        val row = CharArray(queen.size){ '.' }
+        val row = CharArray(queen.size) { '.' }
         row[queen[i]] = 'Q'
         result.add(row.joinToString(""))
     }
