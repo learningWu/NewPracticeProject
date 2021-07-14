@@ -2,6 +2,7 @@ package com.chulan.newtestproject
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.ui.res.painterResource
 import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.ArrayList
@@ -39,7 +40,10 @@ fun main() {
         intArrayOf(15, 18)
     )
 
-    slidingPuzzle(arrayOf(intArrayOf(3,2,4), intArrayOf(1,5,0)))
+    ladderLength(
+        "hit","cog",
+        arrayOf("hot","dot","dog","lot","log","cog").toList()
+    )
 }
 
 internal class Trie
@@ -935,6 +939,7 @@ private val canAvailable = arrayOf(
 )
 
 private val visitedSet = HashSet<String>()
+
 @RequiresApi(Build.VERSION_CODES.N)
 fun slidingPuzzle(board: Array<IntArray>): Int {
     // BFS 状态树 扩散最短路径
@@ -943,31 +948,31 @@ fun slidingPuzzle(board: Array<IntArray>): Int {
     val queue = PriorityQueue<AStar>(kotlin.Comparator<AStar> { o1, o2 ->
         o1.f - o2.f
     })
-    queue.offer(AStar(boardStr,0))
+    queue.offer(AStar(boardStr, 0))
     while (queue.isNotEmpty()) {
-            queue.poll()?.let {
-                visitedSet.add(it.status)
-                if (it.status == "123450") {
-                    return it.level
+        queue.poll()?.let {
+            visitedSet.add(it.status)
+            if (it.status == "123450") {
+                return it.level
+            }
+            val boardArray = it.status.toCharArray()
+            val indexZero = boardArray.indexOf('0')
+            var newStr: String
+            for (direction in canAvailable[indexZero]) {
+                // 交换
+                boardArray[indexZero] = boardArray[direction].apply {
+                    boardArray[direction] = boardArray[indexZero]
                 }
-                val boardArray = it.status.toCharArray()
-                val indexZero = boardArray.indexOf('0')
-                var newStr: String
-                for (direction in canAvailable[indexZero]) {
-                    // 交换
-                    boardArray[indexZero] = boardArray[direction].apply {
-                        boardArray[direction] = boardArray[indexZero]
-                    }
-                    newStr = boardArray.joinToString("")
-                    if (!visitedSet.contains(newStr)) {
-                        queue.offer(AStar(newStr,it.level + 1))
-                    }
-                    // 还原
-                    boardArray[indexZero] = boardArray[direction].apply {
-                        boardArray[direction] = boardArray[indexZero]
-                    }
+                newStr = boardArray.joinToString("")
+                if (!visitedSet.contains(newStr)) {
+                    queue.offer(AStar(newStr, it.level + 1))
+                }
+                // 还原
+                boardArray[indexZero] = boardArray[direction].apply {
+                    boardArray[direction] = boardArray[indexZero]
                 }
             }
+        }
     }
     return -1
 }
@@ -979,6 +984,7 @@ fun slidingPuzzle(board: Array<IntArray>): Int {
 class AStar(var status: String, var level: Int) {
     var f = 0
     var distance = 0
+
     // 曼哈顿距离
     val dist = arrayOf(
         intArrayOf(0, 1, 2, 1, 2, 3),
@@ -995,7 +1001,7 @@ class AStar(var status: String, var level: Int) {
         f = level + distance
     }
 
-    private fun getD():Int {
+    private fun getD(): Int {
         var result = 0
         for (i in 0 until 6) {
             // 只要其他 5 个的都在原位，自然就是结果，距离就是 0。所以可以忽略 0 的位置
@@ -1098,4 +1104,148 @@ fun genBoard(queen: IntArray) {
         result.add(row.joinToString(""))
     }
     resultSolves.add(result)
+}
+
+fun solveSudoku(board: Array<CharArray>): Unit {
+    if (board.isEmpty()) return
+    dfsSolve(board)
+}
+
+fun dfsSolve(board: Array<CharArray>): Boolean {
+    // 将棋盘上不为 '.' 的部分进行替换数字。替换后校验棋盘合法性,合法继续替换下一个
+    for (i in board.indices)
+        for (j in board[i].indices) {
+            if (board[i][j] == '.') {
+                // 使用 [1..9] 进行替换
+                for (c in '1'..'9') {
+                    if (isValid(board, i, j, c)) {
+                        // 判断棋盘合法，即可放入 c
+                        board[i][j] = c
+                        if (dfsSolve(board))
+                            return true
+                        // 放入 c 无法解决，回溯
+                        board[i][j] = '.'
+                    }
+                }
+                // 1..9 都不可以，返回 false
+                return false
+            }
+        }
+    // 最后一个数字放入时，走这个 true 。完成整个递归
+    return true
+}
+
+private fun isValid(board: Array<CharArray>, row: Int, column: Int, c: Char): Boolean {
+    for (i in 0 until 9) {
+        // 行里有相同数字
+        if (board[row][i] == c) return false
+        // 列里有相同数字
+        if (board[i][column] == c) return false
+
+        // 遍历同一个格子元素
+        // 将 row,column 映射到 九宫格中
+//        val blockIndex = 3 * (row / 3) + (column / 3)
+        // block 号块的 行 从 3 * (row / 3) -> + i / 3 ( i = 0..2 时就是这个block第一行)
+        // block 号块的 列 从 3 * (column / 3) -> + i % 3 ( 起始列是 3 * (column / 3))
+        // =》 3 * (column / 3)：表示 0..2 的起始列为0；3..5 的起始列为 3
+        // 类比 二维数组中 row * column + i 作为线性 poi
+        val sameBlockElement = board[3 * (row / 3) + i / 3][3 * (column / 3) + i % 3]
+        if (sameBlockElement == c) return false
+    }
+    return true
+}
+
+fun ladderLength(beginWord: String, endWord: String, wordList: List<String>): Int {
+    val wordSet = HashSet<String>(wordList)
+    if (!wordSet.contains(endWord)) return 0
+    // 改变单词字符，在 wordList 存在，进入下一个状态
+    val queue = LinkedList<String>()
+    var path = 1
+    queue.offer(beginWord)
+    while (queue.isNotEmpty()) {
+        repeat(queue.size) {
+            queue.poll()?.let {
+                if (it == endWord) {
+                    return path
+                }
+                for (nextStatus in getNextStatus(it)) {
+                    // 可以变换
+                    if (wordSet.contains(nextStatus)) {
+                        queue.offer(nextStatus)
+                        // 先到的层数一定比后到的快，所以不需要后到的再来了
+                        wordSet.remove(nextStatus)
+                    }
+                }
+            }
+        }
+        path++
+    }
+    return 0
+}
+
+fun getNextStatus(status: String):LinkedList<String> {
+    val result = LinkedList<String>()
+    val statusArray = status.toCharArray()
+    for (i in statusArray.indices) {
+        val originChar = statusArray[i]
+        for (j in 'a'..'z') {
+            if (originChar != j) {
+                statusArray[i] = j
+                result.add(statusArray.joinToString(""))
+            }
+        }
+        // 还原
+        statusArray[i] = originChar
+    }
+    return result
+}
+
+fun minMutation(start: String, end: String, bank: Array<String>): Int {
+
+    val wordSet = HashSet<String>()
+    bank.forEach {
+        wordSet.add(it)
+    }
+    if (!wordSet.contains(end)) return -1
+    // 改变单词字符，在 wordList 存在，进入下一个状态
+    val queue = LinkedList<String>()
+    var path = 0
+    queue.offer(start)
+    while (queue.isNotEmpty()) {
+        repeat(queue.size) {
+            queue.poll()?.let {
+                if (it == end) {
+                    return path
+                }
+                for (nextStatus in getNextGene(it)) {
+                    // 可以变换
+                    if (wordSet.contains(nextStatus)) {
+                        queue.offer(nextStatus)
+                        // 先到的层数一定比后到的快，所以不需要后到的再来了
+                        wordSet.remove(nextStatus)
+                    }
+                }
+            }
+        }
+        path++
+    }
+    return -1
+}
+
+private val geneSwapArray = arrayOf('A','T','C','G')
+fun getNextGene(status: String):LinkedList<String> {
+    val result = LinkedList<String>()
+    val statusArray = status.toCharArray()
+    for (i in statusArray.indices) {
+        val originChar = statusArray[i]
+        for (j in geneSwapArray) {
+            if (originChar != j) {
+                statusArray[i] = j
+                result.add(statusArray.joinToString(""))
+            }
+        }
+        // 还原
+        statusArray[i] = originChar
+    }
+    return result
 }
