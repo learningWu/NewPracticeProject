@@ -1204,75 +1204,47 @@ fun getNextGene(status: String): LinkedList<String> {
 
 /**
  * 单词接龙 双向BFS
- * 正向队列 + 正向 visitedSet
- * 反向队列 + 反向 visitedSet
- * 如果 正向队列数据 碰到了 反向的 visitedSet。节点重合，完成；反之亦然
  */
 fun ladderLength(beginWord: String, endWord: String, wordList: List<String>): Int {
     val wordSet = HashSet<String>(wordList)
     if (!wordSet.contains(endWord)) return 0
 
-    // 正向BFS 访问过的节点
-    val positiveVisitedSet = HashSet<String>()
-    // 反向BFS 访问过的节点
-    val negativeVisitedSet = HashSet<String>()
+    val visited = HashSet<String>()
 
-    val positiveQueue = LinkedList<String>()
-    val negativeQueue = LinkedList<String>()
-    positiveQueue.offer(beginWord)
-    positiveVisitedSet.add(beginWord)
-    negativeQueue.offer(endWord)
-    negativeVisitedSet.add(endWord)
-    var path = 2
-    while (positiveQueue.isNotEmpty() || negativeQueue.isNotEmpty()) {
-        if (positiveQueue.isNotEmpty()) {
-            // 走正向
-            if (bfs(positiveQueue, positiveVisitedSet, negativeVisitedSet, wordSet)) {
-                // 碰到说明这一层已经被另一方访问过，所以path不需要再加1
-                return path
-            }
-            path++
+    var beforeSet = HashSet<String>()
+    var afterSet = HashSet<String>()
+    beforeSet.add(beginWord)
+    afterSet.add(endWord)
+    // 这个 1 代表默认的 beginWord (或者换方向思考，endWord) 就算一个节点
+    var path = 1
+    while (beforeSet.isNotEmpty() && afterSet.isNotEmpty()) {
+        if (afterSet.size < beforeSet.size) {
+            // 交换
+            val temp = afterSet
+            afterSet = beforeSet
+            beforeSet = temp
         }
-        if (negativeQueue.isNotEmpty()) {
-            // 走反向
-            if (bfs(negativeQueue, negativeVisitedSet, positiveVisitedSet, wordSet)) {
-                // 碰到说明这一层已经被另一方访问过，所以path不需要再加1
-                return path
-            }
-            path++
-        }
-    }
-    return 0
-}
-
-/**
- * @param positiveVisitedSet 自己遍历过的
- * @param negativeVisitedSet 另一边遍历过的
- */
-private fun bfs(
-    queue: LinkedList<String>,
-    positiveVisitedSet: HashSet<String>,
-    negativeVisitedSet: HashSet<String>,
-    wordSet: HashSet<String>
-): Boolean {
-    // 将这一层搞完
-    repeat(queue.size) {
-        queue.poll()?.let {
+        val tempSet = HashSet<String>()
+        for (it in beforeSet) {
             for (nextStatus in getNextStatus(it)) {
-                // 可以变换
-                if (wordSet.contains(nextStatus) && !positiveVisitedSet.contains(nextStatus)) {
-                    queue.offer(nextStatus)
-                    positiveVisitedSet.add(nextStatus)
+                // 另一边的待遍历部分已存在，即找到
+                if (afterSet.contains(nextStatus)) {
+                    // 找到时，加上当前这一层
+                    return path + 1
+                }
 
-                    // 另一边已遍历到，即找到
-                    if (negativeVisitedSet.contains(nextStatus)) {
-                        return true
-                    }
+                // 可以变换
+                if (wordSet.contains(nextStatus) && !visited.contains(nextStatus)) {
+                    tempSet.add(nextStatus)
+                    visited.add(nextStatus)
                 }
             }
         }
+        beforeSet = tempSet
+        // 每扩散一层就加1
+        path++
     }
-    return false
+    return 0
 }
 
 fun getNextStatus(status: String): LinkedList<String> {
