@@ -2,7 +2,6 @@ package com.chulan.newtestproject
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.ui.res.painterResource
 import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.ArrayList
@@ -41,8 +40,9 @@ fun main() {
     )
 
     ladderLength(
-        "hit","cog",
-        arrayOf("hot","dot","dog","lot","log","cog").toList()
+        "hot", "dog",
+//        arrayOf("hot", "dot", "dog", "lot", "log", "cog").toList()
+        arrayOf("hot", "dog", "dot").toList()
     )
 }
 
@@ -1106,99 +1106,50 @@ fun genBoard(queen: IntArray) {
     resultSolves.add(result)
 }
 
-fun solveSudoku(board: Array<CharArray>): Unit {
-    if (board.isEmpty()) return
-    dfsSolve(board)
-}
-
-fun dfsSolve(board: Array<CharArray>): Boolean {
-    // 将棋盘上不为 '.' 的部分进行替换数字。替换后校验棋盘合法性,合法继续替换下一个
-    for (i in board.indices)
-        for (j in board[i].indices) {
-            if (board[i][j] == '.') {
-                // 使用 [1..9] 进行替换
-                for (c in '1'..'9') {
-                    if (isValid(board, i, j, c)) {
-                        // 判断棋盘合法，即可放入 c
-                        board[i][j] = c
-                        if (dfsSolve(board))
-                            return true
-                        // 放入 c 无法解决，回溯
-                        board[i][j] = '.'
-                    }
-                }
-                // 1..9 都不可以，返回 false
-                return false
-            }
-        }
-    // 最后一个数字放入时，走这个 true 。完成整个递归
-    return true
-}
-
-private fun isValid(board: Array<CharArray>, row: Int, column: Int, c: Char): Boolean {
-    for (i in 0 until 9) {
-        // 行里有相同数字
-        if (board[row][i] == c) return false
-        // 列里有相同数字
-        if (board[i][column] == c) return false
-
-        // 遍历同一个格子元素
-        // 将 row,column 映射到 九宫格中
-//        val blockIndex = 3 * (row / 3) + (column / 3)
-        // block 号块的 行 从 3 * (row / 3) -> + i / 3 ( i = 0..2 时就是这个block第一行)
-        // block 号块的 列 从 3 * (column / 3) -> + i % 3 ( 起始列是 3 * (column / 3))
-        // =》 3 * (column / 3)：表示 0..2 的起始列为0；3..5 的起始列为 3
-        // 类比 二维数组中 row * column + i 作为线性 poi
-        val sameBlockElement = board[3 * (row / 3) + i / 3][3 * (column / 3) + i % 3]
-        if (sameBlockElement == c) return false
-    }
-    return true
-}
-
-fun ladderLength(beginWord: String, endWord: String, wordList: List<String>): Int {
-    val wordSet = HashSet<String>(wordList)
-    if (!wordSet.contains(endWord)) return 0
-    // 改变单词字符，在 wordList 存在，进入下一个状态
-    val queue = LinkedList<String>()
-    var path = 1
-    queue.offer(beginWord)
-    while (queue.isNotEmpty()) {
-        repeat(queue.size) {
-            queue.poll()?.let {
-                if (it == endWord) {
-                    return path
-                }
-                for (nextStatus in getNextStatus(it)) {
-                    // 可以变换
-                    if (wordSet.contains(nextStatus)) {
-                        queue.offer(nextStatus)
-                        // 先到的层数一定比后到的快，所以不需要后到的再来了
-                        wordSet.remove(nextStatus)
-                    }
-                }
-            }
-        }
-        path++
-    }
-    return 0
-}
-
-fun getNextStatus(status: String):LinkedList<String> {
-    val result = LinkedList<String>()
-    val statusArray = status.toCharArray()
-    for (i in statusArray.indices) {
-        val originChar = statusArray[i]
-        for (j in 'a'..'z') {
-            if (originChar != j) {
-                statusArray[i] = j
-                result.add(statusArray.joinToString(""))
-            }
-        }
-        // 还原
-        statusArray[i] = originChar
-    }
-    return result
-}
+//fun ladderLength(beginWord: String, endWord: String, wordList: List<String>): Int {
+//    val wordSet = HashSet<String>(wordList)
+//    if (!wordSet.contains(endWord)) return 0
+//    // 改变单词字符，在 wordList 存在，进入下一个状态
+//    val queue = LinkedList<String>()
+//    var path = 1
+//    queue.offer(beginWord)
+//    while (queue.isNotEmpty()) {
+//        repeat(queue.size) {
+//            queue.poll()?.let {
+//                if (it == endWord) {
+//                    return path
+//                }
+//                for (nextStatus in getNextStatus(it)) {
+//                    // 可以变换
+//                    if (wordSet.contains(nextStatus)) {
+//                        queue.offer(nextStatus)
+//                        // 先到的层数一定比后到的快，所以不需要后到的再来了
+//                        wordSet.remove(nextStatus)
+//                    }
+//                }
+//            }
+//        }
+//        path++
+//    }
+//    return 0
+//}
+//
+//fun getNextStatus(status: String):LinkedList<String> {
+//    val result = LinkedList<String>()
+//    val statusArray = status.toCharArray()
+//    for (i in statusArray.indices) {
+//        val originChar = statusArray[i]
+//        for (j in 'a'..'z') {
+//            if (originChar != j) {
+//                statusArray[i] = j
+//                result.add(statusArray.joinToString(""))
+//            }
+//        }
+//        // 还原
+//        statusArray[i] = originChar
+//    }
+//    return result
+//}
 
 fun minMutation(start: String, end: String, bank: Array<String>): Int {
 
@@ -1232,8 +1183,8 @@ fun minMutation(start: String, end: String, bank: Array<String>): Int {
     return -1
 }
 
-private val geneSwapArray = arrayOf('A','T','C','G')
-fun getNextGene(status: String):LinkedList<String> {
+private val geneSwapArray = arrayOf('A', 'T', 'C', 'G')
+fun getNextGene(status: String): LinkedList<String> {
     val result = LinkedList<String>()
     val statusArray = status.toCharArray()
     for (i in statusArray.indices) {
@@ -1248,4 +1199,128 @@ fun getNextGene(status: String):LinkedList<String> {
         statusArray[i] = originChar
     }
     return result
+}
+
+
+/**
+ * 单词接龙 双向BFS
+ * 正向队列 + 正向 visitedSet
+ * 反向队列 + 反向 visitedSet
+ * 如果 正向队列数据 碰到了 反向的 visitedSet。节点重合，完成；反之亦然
+ */
+fun ladderLength(beginWord: String, endWord: String, wordList: List<String>): Int {
+    val wordSet = HashSet<String>(wordList)
+    if (!wordSet.contains(endWord)) return 0
+
+    // 正向BFS 访问过的节点
+    val positiveVisitedSet = HashSet<String>()
+    // 反向BFS 访问过的节点
+    val negativeVisitedSet = HashSet<String>()
+
+    val positiveQueue = LinkedList<String>()
+    val negativeQueue = LinkedList<String>()
+    positiveQueue.offer(beginWord)
+    positiveVisitedSet.add(beginWord)
+    negativeQueue.offer(endWord)
+    negativeVisitedSet.add(endWord)
+    var path = 2
+    while (positiveQueue.isNotEmpty() || negativeQueue.isNotEmpty()) {
+        if (positiveQueue.isNotEmpty()) {
+            // 走正向
+            if (bfs(positiveQueue, positiveVisitedSet, negativeVisitedSet, wordSet)) {
+                // 碰到说明这一层已经被另一方访问过，所以path不需要再加1
+                return path
+            }
+            path++
+        }
+        if (negativeQueue.isNotEmpty()) {
+            // 走反向
+            if (bfs(negativeQueue, negativeVisitedSet, positiveVisitedSet, wordSet)) {
+                // 碰到说明这一层已经被另一方访问过，所以path不需要再加1
+                return path
+            }
+            path++
+        }
+    }
+    return 0
+}
+
+/**
+ * @param positiveVisitedSet 自己遍历过的
+ * @param negativeVisitedSet 另一边遍历过的
+ */
+private fun bfs(
+    queue: LinkedList<String>,
+    positiveVisitedSet: HashSet<String>,
+    negativeVisitedSet: HashSet<String>,
+    wordSet: HashSet<String>
+): Boolean {
+    // 将这一层搞完
+    repeat(queue.size) {
+        queue.poll()?.let {
+            for (nextStatus in getNextStatus(it)) {
+                // 可以变换
+                if (wordSet.contains(nextStatus) && !positiveVisitedSet.contains(nextStatus)) {
+                    queue.offer(nextStatus)
+                    positiveVisitedSet.add(nextStatus)
+
+                    // 另一边已遍历到，即找到
+                    if (negativeVisitedSet.contains(nextStatus)) {
+                        return true
+                    }
+                }
+            }
+        }
+    }
+    return false
+}
+
+fun getNextStatus(status: String): LinkedList<String> {
+    val result = LinkedList<String>()
+    val statusArray = status.toCharArray()
+    for (i in statusArray.indices) {
+        val originChar = statusArray[i]
+        for (j in 'a'..'z') {
+            if (originChar != j) {
+                statusArray[i] = j
+                result.add(statusArray.joinToString(""))
+            }
+        }
+        // 还原
+        statusArray[i] = originChar
+    }
+    return result
+}
+
+
+fun solveSudoku(board: Array<CharArray>): Unit {
+    if (board.isEmpty()) return
+    dfsSolve(board)
+}
+
+private fun dfsSolve(board: Array<CharArray>): Boolean {
+    for (i in board.indices)
+        for (j in board[i].indices) {
+            if (board[i][j] == '.') {
+                for (k in '1'..'9') {
+                    if (isValid(board, i, j, k)) {
+                        board[i][j] = k
+                        if (dfsSolve(board))
+                            return true
+                        board[i][j] = '.'
+                    }
+                }
+                return false
+            }
+        }
+    return true
+}
+
+fun isValid(board: Array<CharArray>, row: Int, column: Int, c: Char): Boolean {
+    for (i in board.indices) {
+        if (board[row][i] == c) return false
+        if (board[i][column] == c) return false
+        if (board[3 * (row / 3) + i / 3][3 * (column / 3) + i % 3] == c) return false
+    }
+    return true
 }
