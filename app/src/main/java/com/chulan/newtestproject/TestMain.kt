@@ -32,18 +32,19 @@ fun main() {
 //    } else {
 //        print("没有360")
 //    }
-    val array = arrayOf(
-        intArrayOf(1, 3),
-        intArrayOf(2, 6),
-        intArrayOf(8, 10),
-        intArrayOf(15, 18)
-    )
-
-    ladderLength(
-        "hot", "dog",
-//        arrayOf("hot", "dot", "dog", "lot", "log", "cog").toList()
-        arrayOf("hot", "dog", "dot").toList()
-    )
+//    val array = arrayOf(
+//        intArrayOf(1, 3),
+//        intArrayOf(2, 6),
+//        intArrayOf(8, 10),
+//        intArrayOf(15, 18)
+//    )
+//
+//    ladderLength(
+//        "hot", "dog",
+////        arrayOf("hot", "dot", "dog", "lot", "log", "cog").toList()
+//        arrayOf("hot", "dog", "dot").toList()
+//    )
+    addRungs(intArrayOf(4, 8, 12, 16), 3)
 }
 
 internal class Trie
@@ -700,17 +701,6 @@ fun largestOddNumber(num: String): String {
     return ""
 }
 
-fun climbStairs(n: Int): Int {
-    if (n <= 2) return n
-    val dp = IntArray(n + 1)
-    dp[1] = 1
-    dp[2] = 2
-    for (i in 3 until dp.size) {
-        dp[i] = dp[i - 1] + dp[i - 2]
-    }
-    return dp[n]
-}
-
 fun minCostClimbingStairs(cost: IntArray): Int {
     // dp : 到达每个阶梯的最小花费
     // 求 dp[cost.size + 1] : 顶层阶梯
@@ -1295,4 +1285,103 @@ fun isValid(board: Array<CharArray>, row: Int, column: Int, c: Char): Boolean {
         if (board[3 * (row / 3) + i / 3][3 * (column / 3) + i % 3] == c) return false
     }
     return true
+}
+
+fun canBeTypedWords(text: String, brokenLetters: String): Int {
+    val words = text.split(" ")
+    val brokenSet = hashSetOf<Char>()
+    brokenLetters.forEach {
+        brokenSet.add(it)
+    }
+    var counter = 0
+    for (word in words) {
+        if (isAvailable(word, brokenSet))
+            counter++
+    }
+    return counter
+}
+
+private fun isAvailable(word: String, brokenSet: HashSet<Char>): Boolean {
+    for (c in word) {
+        if (brokenSet.contains(c)) {
+            return false
+        }
+    }
+    return true
+}
+
+fun addRungs(rungs: IntArray, dist: Int): Int {
+    // dist 一个人的步幅
+    var i = 0
+    // 地板 0
+    var accessPoi = 0
+    var counter = 0
+    while (i < rungs.size) {
+        if (accessPoi + dist >= rungs[i]) {
+            accessPoi = rungs[i]
+            i++
+        } else {
+            // 加梯子
+            counter += (Math.ceil((rungs[i] - accessPoi).toDouble() / dist.toDouble())).toInt() - 1
+            accessPoi = rungs[i]
+            i++
+        }
+    }
+    return counter
+}
+
+private var max = Long.MIN_VALUE
+
+fun maxPoints(points: Array<IntArray>): Long {
+    // 暴力法
+    solve(points, 0, -1, 0)
+    return max
+}
+
+fun solve(points: Array<IntArray>, row: Int, lastRowColumn: Int, pickValue: Long) {
+    if (row == points.size) {
+        max = Math.max(pickValue, max)
+        return
+    }
+    for (i in points[row].indices) {
+
+        val cost = if (row == 0) 0 else Math.abs(lastRowColumn - i)
+        val pickValueAmount = points[row][i] + pickValue - cost
+        solve(points, row + 1, i, pickValueAmount)
+    }
+}
+
+private val cacheMap = HashMap<Int, Int>()
+fun climbStairs(n: Int): Int {
+    // 已计算过的值进行缓存，达到剪枝目的
+    if (n <= 2) return n
+    if (cacheMap.containsKey(n)) {
+        // 剪枝
+        return cacheMap[n]!!
+    }
+    val amount = climbStairs(n - 1) + climbStairs(n - 2)
+    cacheMap[n] = amount
+    return amount
+}
+
+fun generateParenthesis(n: Int): List<String> {
+    val result = LinkedList<String>()
+    generate(n, 0, 0, "", result)
+    return result
+}
+
+fun generate(n: Int, leftCount: Int, rightCount: Int, s: String, result: LinkedList<String>) {
+    if (leftCount == n && rightCount == n) {
+        result.add(s)
+        return
+    }
+
+    if (leftCount < n) {
+        // 剪枝：只有这种情况可以加入左括号
+        generate(n, leftCount + 1, rightCount, "$s(", result)
+    }
+    if (rightCount < leftCount) {
+        // 剪枝：只有这种情况可以加入右括号
+        generate(n, leftCount, rightCount + 1, "$s)", result)
+    }
 }
