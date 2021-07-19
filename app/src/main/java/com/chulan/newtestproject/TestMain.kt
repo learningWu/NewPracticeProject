@@ -32,6 +32,13 @@ fun main() {
 //    } else {
 //        print("没有360")
 //    }
+    val array = arrayOf(
+        intArrayOf(1, 3),
+        intArrayOf(2, 6),
+        intArrayOf(8, 10),
+        intArrayOf(15, 18)
+    )
+
 //    val array = arrayOf(
 //        intArrayOf(1, 3),
 //        intArrayOf(2, 6),
@@ -1143,31 +1150,39 @@ fun genBoard(queen: IntArray) {
 
 fun minMutation(start: String, end: String, bank: Array<String>): Int {
 
-    val wordSet = HashSet<String>()
+    val geneSet = HashSet<String>()
     bank.forEach {
-        wordSet.add(it)
+        geneSet.add(it)
     }
-    if (!wordSet.contains(end)) return -1
-    // 改变单词字符，在 wordList 存在，进入下一个状态
-    val queue = LinkedList<String>()
+    if (!geneSet.contains(end)) return -1
+
+    var beforeSet = HashSet<String>()
+    var afterSet = HashSet<String>()
+    val visitedSet = HashSet<String>()
+    beforeSet.add(start)
+    afterSet.add(end)
+
     var path = 0
-    queue.offer(start)
-    while (queue.isNotEmpty()) {
-        repeat(queue.size) {
-            queue.poll()?.let {
-                if (it == end) {
-                    return path
+
+    while (beforeSet.isNotEmpty() && afterSet.isNotEmpty()) {
+        if (afterSet.size < beforeSet.size) {
+            val temp = afterSet
+            afterSet = beforeSet
+            beforeSet = temp
+        }
+        val nextLevelVisitSet = HashSet<String>()
+        for (it in beforeSet) {
+            for (nextStatus in getNextGene(it)) {
+                if (afterSet.contains(nextStatus)) {
+                    return path + 1
                 }
-                for (nextStatus in getNextGene(it)) {
-                    // 可以变换
-                    if (wordSet.contains(nextStatus)) {
-                        queue.offer(nextStatus)
-                        // 先到的层数一定比后到的快，所以不需要后到的再来了
-                        wordSet.remove(nextStatus)
-                    }
+                // 可以变换
+                if (geneSet.contains(nextStatus) && !visitedSet.contains(nextStatus)) {
+                    nextLevelVisitSet.add(nextStatus)
                 }
             }
         }
+        beforeSet = nextLevelVisitSet
         path++
     }
     return -1
@@ -1190,68 +1205,57 @@ fun getNextGene(status: String): LinkedList<String> {
     }
     return result
 }
+class SolutionStartEndBFS {
 
+    /**
+     * 双向BFS模板
+     * 可使用双向BFS条件：起点可到终点，终点可到起点
+     */
+    fun start2endBfsTemplate(start: String, end: String, accessSet: Set<String>):Int {
+        if (!accessSet.contains(end)) return -1
 
-/**
- * 单词接龙 双向BFS
- */
-fun ladderLength(beginWord: String, endWord: String, wordList: List<String>): Int {
-    val wordSet = HashSet<String>(wordList)
-    if (!wordSet.contains(endWord)) return 0
-
-    val visited = HashSet<String>()
-
-    var beforeSet = HashSet<String>()
-    var afterSet = HashSet<String>()
-    beforeSet.add(beginWord)
-    afterSet.add(endWord)
-    // 这个 1 代表默认的 beginWord (或者换方向思考，endWord) 就算一个节点
-    var path = 1
-    while (beforeSet.isNotEmpty() && afterSet.isNotEmpty()) {
-        if (afterSet.size < beforeSet.size) {
-            // 交换
-            val temp = afterSet
-            afterSet = beforeSet
-            beforeSet = temp
-        }
-        val tempSet = HashSet<String>()
-        for (it in beforeSet) {
-            for (nextStatus in getNextStatus(it)) {
-                // 另一边的待遍历部分已存在，即找到
-                if (afterSet.contains(nextStatus)) {
-                    // 找到时，加上当前这一层
-                    return path + 1
-                }
-
-                // 可以变换
-                if (wordSet.contains(nextStatus) && !visited.contains(nextStatus)) {
-                    tempSet.add(nextStatus)
-                    visited.add(nextStatus)
+        // 定义从前遍历集合
+        var beforeSet = HashSet<String>()
+        // 定义从后遍历集合
+        var afterSet = HashSet<String>()
+        // 定义已遍历节点集合
+        val visitedSet = HashSet<String>()
+        // 定义起始节点数量 可能 0 或 1
+        var len = 0
+        while (beforeSet.isNotEmpty() && afterSet.isNotEmpty()) {
+            // 选择节点少的方向遍历
+            if (afterSet.size < beforeSet.size) {
+                val temp = afterSet
+                afterSet = beforeSet
+                beforeSet = temp
+            }
+            // 下一层遍历的集合
+            val nextLevelVisitSet = HashSet<String>()
+            for (it in beforeSet) {
+                // 遍历下一层可变化的数据集合  （自己的操作）
+                for (nextStatus in getNextStatus(it)) {
+                    if (afterSet.contains(nextStatus)) {
+                        return len + 1
+                    }
+                    // 可以变换
+                    if (accessSet.contains(nextStatus) && !visitedSet.contains(nextStatus)) {
+                        nextLevelVisitSet.add(nextStatus)
+                    }
                 }
             }
+            beforeSet = nextLevelVisitSet
+            // 遍历层数+1
+            len++
         }
-        beforeSet = tempSet
-        // 每扩散一层就加1
-        path++
+        return -1
     }
-    return 0
-}
 
-fun getNextStatus(status: String): LinkedList<String> {
-    val result = LinkedList<String>()
-    val statusArray = status.toCharArray()
-    for (i in statusArray.indices) {
-        val originChar = statusArray[i]
-        for (j in 'a'..'z') {
-            if (originChar != j) {
-                statusArray[i] = j
-                result.add(statusArray.joinToString(""))
-            }
-        }
-        // 还原
-        statusArray[i] = originChar
+    /**
+     * 不同的变换操作
+     */
+    private fun getNextStatus(it: String):List<String> {
+        return emptyList()
     }
-    return result
 }
 
 
