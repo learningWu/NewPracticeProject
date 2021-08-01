@@ -37,4 +37,11 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"/>
 
+    <TextView
+        android:id="@+id/tvToNextActivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textColor="@color/red"
+        android:text="下个activity"/>
 </com.chulan.newtestproject.view.drag.DragUpDownLayout>

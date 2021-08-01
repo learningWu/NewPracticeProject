@@ -51,7 +51,15 @@ fun main() {
 ////        arrayOf("hot", "dot", "dog", "lot", "log", "cog").toList()
 //        arrayOf("hot", "dog", "dot").toList()
 //    )
-    addRungs(intArrayOf(4, 8, 12, 16), 3)
+//    addRungs(intArrayOf(4, 8, 12, 16), 3)
+    solve(
+        arrayOf(
+            charArrayOf('X', 'X', 'X', 'X'),
+            charArrayOf('O', 'O', 'O', 'X'),
+            charArrayOf('X', 'X', 'O', 'X'),
+            charArrayOf('X', 'O', 'X', 'X'),
+        )
+    )
 }
 
 internal class Trie
@@ -137,6 +145,9 @@ class UnionFind(var n: Int) {
         count--
     }
 
+    fun isConnect(a: Int, b: Int): Boolean {
+        return find(a) == find(b)
+    }
 }
 
 
@@ -1148,70 +1159,13 @@ fun genBoard(queen: IntArray) {
 //    return result
 //}
 
-fun minMutation(start: String, end: String, bank: Array<String>): Int {
-
-    val geneSet = HashSet<String>()
-    bank.forEach {
-        geneSet.add(it)
-    }
-    if (!geneSet.contains(end)) return -1
-
-    var beforeSet = HashSet<String>()
-    var afterSet = HashSet<String>()
-    val visitedSet = HashSet<String>()
-    beforeSet.add(start)
-    afterSet.add(end)
-
-    var path = 0
-
-    while (beforeSet.isNotEmpty() && afterSet.isNotEmpty()) {
-        if (afterSet.size < beforeSet.size) {
-            val temp = afterSet
-            afterSet = beforeSet
-            beforeSet = temp
-        }
-        val nextLevelVisitSet = HashSet<String>()
-        for (it in beforeSet) {
-            for (nextStatus in getNextGene(it)) {
-                if (afterSet.contains(nextStatus)) {
-                    return path + 1
-                }
-                // 可以变换
-                if (geneSet.contains(nextStatus) && !visitedSet.contains(nextStatus)) {
-                    nextLevelVisitSet.add(nextStatus)
-                }
-            }
-        }
-        beforeSet = nextLevelVisitSet
-        path++
-    }
-    return -1
-}
-
-private val geneSwapArray = arrayOf('A', 'T', 'C', 'G')
-fun getNextGene(status: String): LinkedList<String> {
-    val result = LinkedList<String>()
-    val statusArray = status.toCharArray()
-    for (i in statusArray.indices) {
-        val originChar = statusArray[i]
-        for (j in geneSwapArray) {
-            if (originChar != j) {
-                statusArray[i] = j
-                result.add(statusArray.joinToString(""))
-            }
-        }
-        // 还原
-        statusArray[i] = originChar
-    }
-    return result
-}
 class SolutionStartEndBFS {
 
     /**
      * 双向BFS模板
      * 可使用双向BFS条件：起点可到终点，终点可到起点
      */
-    fun start2endBfsTemplate(start: String, end: String, accessSet: Set<String>):Int {
+    fun start2endBfsTemplate(start: String, end: String, accessSet: Set<String>): Int {
         if (!accessSet.contains(end)) return -1
 
         // 定义从前遍历集合
@@ -1253,7 +1207,7 @@ class SolutionStartEndBFS {
     /**
      * 不同的变换操作
      */
-    private fun getNextStatus(it: String):List<String> {
+    private fun getNextStatus(it: String): List<String> {
         return emptyList()
     }
 }
@@ -1388,4 +1342,200 @@ fun generate(n: Int, leftCount: Int, rightCount: Int, s: String, result: LinkedL
         // 剪枝：只有这种情况可以加入右括号
         generate(n, leftCount, rightCount + 1, "$s)", result)
     }
+}
+
+fun minMutation(start: String, end: String, bank: Array<String>): Int {
+    // 使用 set 查的快
+    val bankSet = HashSet<String>()
+    bank.forEach {
+        bankSet.add(it)
+    }
+    if (end !in bankSet) {
+        return -1
+    }
+    var beforeSet = HashSet<String>()
+    var afterSet = HashSet<String>()
+    val visitedSet = HashSet<String>()
+    beforeSet.add(start)
+    afterSet.add(end)
+    visitedSet.add(start)
+    visitedSet.add(end)
+    var path = 0
+    while (beforeSet.isNotEmpty() && afterSet.isNotEmpty()) {
+        if (afterSet.size < beforeSet.size) {
+            // 从小的方向开始
+            val temp = afterSet
+            afterSet = beforeSet
+            beforeSet = temp
+        }
+        val nextSet = HashSet<String>()
+        for (gene in beforeSet) {
+            for (nextGene in swapGene(gene)) {
+                if (nextGene in afterSet) {
+                    // 找到
+                    return path + 1
+                }
+                if (nextGene !in visitedSet && nextGene in bankSet) {
+                    nextSet.add(nextGene)
+                    visitedSet.add(nextGene)
+                }
+            }
+        }
+        path++
+        beforeSet = nextSet
+    }
+    return -1
+}
+
+private val geneSwapArray = arrayOf('A', 'T', 'C', 'G')
+private fun swapGene(gene: String): LinkedList<String> {
+    val result = LinkedList<String>()
+    val array = gene.toCharArray()
+    for (i in array.indices) {
+        for (swap in geneSwapArray) {
+            if (swap != array[i]) {
+                val origin = array[i]
+                array[i] = swap
+                result.add(String(array))
+                array[i] = origin
+            }
+        }
+    }
+    return result
+}
+
+fun getLucky(s: String, k: Int): Int {
+    var value = ""
+    var realValue = 0
+    for (c in s) {
+        if (c in 'a'..'z') {
+            value += c - 'a' + 1
+        }
+    }
+    repeat(k) {
+        realValue = 0
+        for (c in value) {
+            realValue += c - '0'
+        }
+        value = "" + realValue
+    }
+    return realValue
+}
+
+fun maximumNumber(num: String, change: IntArray): String {
+    val array = num.map {
+        it - '0'
+    }.toMutableList()
+    var isUse = false
+    for (i in array.indices) {
+        if (isUse && array[i] > change[array[i]]) {
+            break
+        }
+        if (array[i] < change[array[i]]) {
+            array[i] = change[array[i]]
+            isUse = true
+        }
+    }
+    return array.joinToString("")
+}
+
+fun maxCompatibilitySum(students: Array<IntArray>, mentors: Array<IntArray>): Int {
+    // 搜索 状态树
+    val nextAccessStudentSet = HashSet<Int>()
+    val nextAccessMentorSet = HashSet<Int>()
+    for (i in students.indices) {
+        nextAccessStudentSet.add(i)
+        nextAccessMentorSet.add(i)
+    }
+    return solveDFS(0, students, mentors, nextAccessStudentSet, nextAccessMentorSet)
+}
+
+fun solveDFS(
+    level: Int,
+    students: Array<IntArray>,
+    mentors: Array<IntArray>,
+    accessStudentISet: HashSet<Int>,
+    accessMentorJSet: HashSet<Int>
+): Int {
+    if (accessStudentISet.isEmpty() || accessMentorJSet.isEmpty()) {
+        return 0
+    }
+    var currentMax = 0
+    // TODO(wzx) : 这里重复了啊。。
+    for (j in accessMentorJSet) {
+        var currentStatusMaxScore = computeScore(students[level], mentors[j])
+        val nextAccessStudentSet = HashSet(accessStudentISet)
+        val nextAccessMentorSet = HashSet(accessMentorJSet)
+        nextAccessStudentSet.remove(level)
+        nextAccessMentorSet.remove(j)
+        currentStatusMaxScore += solveDFS(
+            level + 1,
+            students,
+            mentors,
+            nextAccessStudentSet,
+            nextAccessMentorSet
+        )
+        currentMax = Math.max(currentMax, currentStatusMaxScore)
+    }
+    return currentMax
+}
+
+fun computeScore(studentArray: IntArray, mentorArray: IntArray): Int {
+    var count = 0
+    for (i in studentArray.indices) {
+        if (studentArray[i] == mentorArray[i]) {
+            count++
+        }
+    }
+    return count
+}
+
+fun solve(board: Array<CharArray>): Unit {
+    val rows = board.size
+    val columns = board[0].size
+    // 并查集
+    val uf = UnionFind(rows * columns + 1)
+
+    // 获得二维坐标
+    fun node(row: Int, column: Int) = row * columns + column
+
+    // 虚拟节点 代表 不可转换的边界
+    val dummyNode = rows * columns
+    for (i in board.indices)
+        for (j in board[i].indices) {
+            // 将四条边界先连通
+
+            if (board[i][j] == 'O') {
+                if (i == 0 || j == 0 || i == rows - 1 || j == columns - 1) {
+                    uf.union(node(i, j), dummyNode)
+                } else {
+                    // 合并到左边的集合
+                    if (j > 0 && board[i][j - 1] == 'O') {
+                        uf.union(node(i, j), node(i, j - 1))
+                    }
+                    // 和右方合并集合
+                    if (j < columns - 1 && board[i][j + 1] == 'O') {
+                        uf.union(node(i, j), node(i, j + 1))
+                    }
+                    // 和下方合并集合
+                    if (i > 0 && board[i - 1][j] == 'O') {
+                        uf.union(node(i, j), node(i - 1, j))
+                    }
+                    // 和下方合并集合
+                    if (i < columns - 1 && board[i + 1][j] == 'O') {
+                        uf.union(node(i, j), node(i + 1, j))
+                    }
+                }
+
+            }
+        }
+    // 进行转换
+    for (i in board.indices)
+        for (j in board[i].indices) {
+            if (uf.isConnect(node(i, j), dummyNode)) {
+                board[i][j] = 'O'
+            } else {
+                board[i][j] = 'X'
+            }
+        }
 }

@@ -3,6 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/android/project/NewPracticeProject/app/src/main/res/layout/activity_1.xml" value="0.2776268115942029" />
+        <entry key="..\:/android/project/NewPracticeProject/app/src/main/res/layout/activity_avatar_view_demo.xml" value="0.10740740740740741" />
+        <entry key="..\:/android/project/NewPracticeProject/app/src/main/res/layout/activity_clock_view_demo.xml" value="0.2776268115942029" />
+        <entry key="..\:/android/project/NewPracticeProject/app/src/main/res/layout/activity_drag_layout_demo.xml" value="0.2776268115942029" />
         <entry key="..\:/android/project/NewPracticeProject/app/src/main/res/layout/activity_nested_scalable_image_view_demo.xml" value="0.26268115942028986" />
         <entry key="..\:/android/project/NewPracticeProject/app/src/main/res/layout/activity_scalable_image_view_demo.xml" value="0.26268115942028986" />
         <entry key="..\:/wzx/android/mydemo/NewTestProject/app/src/main/res/layout/activity_avatar_view_demo.xml" value="0.16666666666666666" />

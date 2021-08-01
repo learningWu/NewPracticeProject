@@ -11,4 +11,7 @@
     <string name="nested_view">嵌套滑动</string>
     <string name="compose_practice">compose 练习</string>
     <string name="motion_layout">MotionLayout 练习</string>
+    <string name="launcher_activity1">启动模式 demo  activity1</string>
+    <string name="launcher_activity2">启动模式 demo  activity2</string>
+    <string name="launcher_activity3">启动模式 demo  activity3</string>
 </resources>

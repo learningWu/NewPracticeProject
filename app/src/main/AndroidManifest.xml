@@ -39,6 +39,12 @@
             android:label="@string/nested_view"/>
         <activity android:name=".activity.MotionLayoutActivity"
             android:label="@string/motion_layout"/>
+        <activity android:name=".activity.launchermode.Activity1"
+            android:label="@string/launcher_activity1"/>
+        <activity android:name=".activity.launchermode.Activity2"
+            android:label="@string/launcher_activity2"/>
+        <activity android:name=".activity.launchermode.Activity3"
+            android:label="@string/launcher_activity3"/>
     </application>
 
 </manifest>

@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.chulan.newtestproject.activity.*
+import com.chulan.newtestproject.activity.launchermode.Activity1
 import com.chulan.newtestproject.compose.ComposePracticeActivity
 import com.chulan.newtestproject.ext.startActivity
 
@@ -90,6 +91,10 @@ class MainActivity : ComponentActivity() {
 
         ActionButton(getString(R.string.motion_layout)) {
             startActivity<MotionLayoutActivity>()
+        }
+
+        ActionButton(getString(R.string.launcher_activity1)) {
+            startActivity<Activity1>()
         }
     }
 

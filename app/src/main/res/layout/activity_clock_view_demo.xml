@@ -9,4 +9,12 @@
     <com.chulan.newtestproject.view.ClockView
         android:layout_width="200dp"
         android:layout_height="200dp" />
+
+    <TextView
+        android:id="@+id/tvToNextActivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textColor="@color/red"
+        android:text="下个activity"/>
 </androidx.appcompat.widget.LinearLayoutCompat>
