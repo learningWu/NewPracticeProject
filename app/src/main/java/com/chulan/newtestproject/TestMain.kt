@@ -1539,3 +1539,22 @@ fun solve(board: Array<CharArray>): Unit {
             }
         }
 }
+
+fun maxProfit(prices: IntArray): Int {
+    // dp[i][k] {k in 0,1}
+    // k == 0 : 代表手上没股票时持有的最大现金数
+    // k == 1 : 代表手上有股票时持有的最大现金数
+    val dp = Array(prices.size) { IntArray(2) }
+    dp[0][0] = 0
+    dp[0][1] = -prices[0]
+    for (i in 1 until prices.size) {
+        // 股票到 i 时，没有股票的最大值为：前面没有股票的值 或者 前面有股票，现在卖了
+        // dp[i - 1][0] 就相当于不操作，继续不买入   （从前面卖出的操作赚到的钱 和 持有前面股票到现在卖出 i 价格，选择赚钱更多的操作存下来）
+        dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] + prices[i])
+        // 股票到 i 时，有股票的最大值为：继续持有前面股票的值 或者 前面没有股票，现在买了
+        // 因为只允许买入一次，所以值为  - prices[i]   （从前面持有的股票和持有当前i股票做一个选择，选择值更小的股票持有）
+        dp[i][1] = Math.max(dp[i - 1][1], - prices[i])
+    }
+    // 最大的一定是手上没股票的时候（有股票还要减值）
+    return dp[prices.size - 1][0]
+}
