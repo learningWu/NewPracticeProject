@@ -52,14 +52,15 @@ fun main() {
 //        arrayOf("hot", "dog", "dot").toList()
 //    )
 //    addRungs(intArrayOf(4, 8, 12, 16), 3)
-    solve(
-        arrayOf(
-            charArrayOf('X', 'X', 'X', 'X'),
-            charArrayOf('O', 'O', 'O', 'X'),
-            charArrayOf('X', 'X', 'O', 'X'),
-            charArrayOf('X', 'O', 'X', 'X'),
-        )
-    )
+//    solve(
+//        arrayOf(
+//            charArrayOf('X', 'X', 'X', 'X'),
+//            charArrayOf('O', 'O', 'O', 'X'),
+//            charArrayOf('X', 'X', 'O', 'X'),
+//            charArrayOf('X', 'O', 'X', 'X'),
+//        )
+//    )
+    maxProfit(intArrayOf(8, 6, 4, 3, 2, 1))
 }
 
 internal class Trie
@@ -1540,7 +1541,10 @@ fun solve(board: Array<CharArray>): Unit {
         }
 }
 
-fun maxProfit(prices: IntArray): Int {
+/**
+ * 股票 1
+ */
+fun maxProfit1(prices: IntArray): Int {
     // dp[i][k] {k in 0,1}
     // k == 0 : 代表手上没股票时持有的最大现金数
     // k == 1 : 代表手上有股票时持有的最大现金数
@@ -1553,8 +1557,122 @@ fun maxProfit(prices: IntArray): Int {
         dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] + prices[i])
         // 股票到 i 时，有股票的最大值为：继续持有前面股票的值 或者 前面没有股票，现在买了
         // 因为只允许买入一次，所以值为  - prices[i]   （从前面持有的股票和持有当前i股票做一个选择，选择值更小的股票持有）
-        dp[i][1] = Math.max(dp[i - 1][1], - prices[i])
+        dp[i][1] = Math.max(dp[i - 1][1], -prices[i])
     }
     // 最大的一定是手上没股票的时候（有股票还要减值）
     return dp[prices.size - 1][0]
 }
+
+/**
+ * 股票 2
+ */
+fun maxProfit2(prices: IntArray): Int {
+    // dp[i][k] {k in 0,1}
+    // k == 0 : 代表手上没股票时持有的最大现金流
+    // k == 1 : 代表手上有股票时持有的最大现金流
+    val dp = Array(prices.size) { IntArray(2) }
+    dp[0][0] = 0
+    dp[0][1] = -prices[0]
+    for (i in 1 until prices.size) {
+        // 股票到 i 时，没有股票的最大值为：前面没有股票的值 或者 前面有股票，现在卖了
+        // dp[i - 1][0] 就相当于不操作，继续不买入   （从前面卖出的操作赚到的钱 和 持有前面股票到现在卖出 i 价格，选择更多的现金流存下来）
+        dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1] + prices[i])
+        // 股票到 i 时，有股票的最大值为：继续持有前面股票的值 或者 前面没有股票，现在买了
+        // 可以允许多次购买，所以dp[i - 1][0] - prices[i]：前面赚到的钱再买入当前i价格的股票
+        dp[i][1] = Math.max(dp[i - 1][1], dp[i - 1][0] - prices[i])
+    }
+    // 最大的一定是手上没股票的时候（有股票还要减值）
+    return dp[prices.size - 1][0]
+}
+
+/**
+ * 股票 3
+ */
+fun maxProfit3(prices: IntArray): Int {
+    // 三维 dp ：dp[i][j][k] k 指当前操作了几次 ( 卖出算一次 )
+    val dp = Array(prices.size) { Array(2) { IntArray(3) } }
+    dp[0][0][0] = 0
+    dp[0][1][0] = -prices[0]
+    // 不管 算几次交易，只要持有都是 -prices[0]
+    dp[0][0][1] = 0
+    // 相当于前面有过一次操作。我又买入（但是还没卖出）
+    dp[0][1][1] = -prices[0]
+    dp[0][0][2] = 0
+    // 相当于前面有过 2 次操作。我又买入（但是还没卖出，也没法卖出）
+    dp[0][1][2] = -prices[0]
+    for (i in 1 until prices.size) {
+        // 手上没股票的情况
+        // 1. 到 i 还是没操作
+        dp[i][0][0] = dp[i - 1][0][0]
+        // 2. 到 i 操作一次，前面没操作过 , 到 i 操作一次
+        dp[i][0][1] = Math.max(dp[i - 1][0][1], dp[i - 1][1][0] + prices[i])
+        // 3. 到 i 操作两次，前面操作过 1 次, 到 i 操作一次
+        dp[i][0][2] = Math.max(dp[i - 1][0][2], dp[i - 1][1][1] + prices[i])
+
+        // 手上有股票的情况
+        // 1. 前面没操作过，还有股票，说明是有前面的股票 或者 有当前 i 价格的股票
+        dp[i][1][0] = Math.max(dp[i - 1][1][0], -prices[i])
+        // 2. dp[i - 1][1][1] 使用前面操作过的值和之前购入的股票  或者  dp[i - 1][0][1] - prices[i] 前面卖出操作过，再买入当前的股票
+        // (其实就是选择买前面那个股票，还是买现在这个股票，来持有)
+        dp[i][1][1] = Math.max(dp[i - 1][1][1], dp[i - 1][0][1] - prices[i])
+        // 3. 同 2 理
+        dp[i][1][2] = Math.max(dp[i - 1][1][2], dp[i - 1][0][2] - prices[i])
+    }
+    return dp[prices.size - 1][0].max() ?: 0
+}
+
+/**
+ * 股票 冷冻期
+ */
+fun maxProfitCood(prices: IntArray): Int {
+    if (prices.size < 2) {
+        return 0
+    }
+    // 记录卖和没卖的状态
+    val dp = Array(prices.size) { Array(2) { IntArray(2) } }
+    dp[0][0][0] = 0
+    dp[0][1][0] = -prices[0]
+    var result = Int.MIN_VALUE
+    // 列出所有情况，找出最大值
+    for (i in 1 until prices.size) {
+        // 手上没股票且卖了 = 前一个有股票且没卖的钱 + 这个股票赚到的钱
+        dp[i][0][1] = dp[i - 1][1][0] + prices[i]
+        // 手上没股票且没卖钱 = 前一个没股票且没卖钱 与 前一个没股票卖了前一个股票价格钱 的较大者（操作）
+        dp[i][0][0] = Math.max(dp[i - 1][0][0], dp[i - 1][0][1])
+        // 手上有股票且没卖钱 = 前一个有股票且卖钱 与 前一个没股票卖了前一个股票价格钱，然后买入当前股票 的较大者（操作）
+        //（手上有股票不可能出现卖钱状态 也就是dp[i][1][1]不存在）
+        dp[i][1][0] = Math.max(dp[i - 1][1][0], dp[i - 1][0][0] - prices[i])
+        // 找到几种操作的最大值(最优操作)
+        result = arrayOf(dp[i][0][1], dp[i][0][0], dp[i][1][0]).max()!!
+    }
+    return result
+}
+
+/**
+ * 股票 1
+ */
+//fun maxProfit(prices: IntArray): Int {
+//    // 买的花掉的钱
+//    var firstBuy = Int.MIN_VALUE
+//    // 卖的赚到的钱
+//    var firstSell = 0
+//    for (i in prices.indices) {
+//        firstBuy = Math.max(firstBuy, -prices[i])
+//        firstSell = Math.max(firstSell , firstBuy + prices[i])
+//    }
+//    return firstSell
+//}
+
+//fun maxProfit(prices: IntArray): Int {
+//    // 买的花掉的钱
+//    var buy = Int.MIN_VALUE
+//    // 卖的赚到的钱
+//    var sell = 0
+//    for (i in prices.indices) {
+//        // 能赚钱就卖了 => 累计总利润到 sell
+//        sell = Math.max(sell , sell + (buy + prices[i]))
+//        // 每次都买入（反正能连续买卖）后面能赚钱就卖了。不能拿着也没事
+//        buy = -prices[i]
+//    }
+//    return sell
+//}
