@@ -2,6 +2,7 @@ package com.chulan.newtestproject.activity.launchermode
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.chulan.newtestproject.R
@@ -17,7 +18,13 @@ class Activity3 : AppCompatActivity() {
         setContentView(R.layout.activity_to_next_demo)
 
         findViewById<View>(R.id.tvToNextActivity).setOnClickListener {
-            startActivity<Activity1> { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
+            startActivity<Activity2> {  }
         }
+        Log.d("hhh","onCreate Activity3  taskId $taskId")
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        Log.d("hhh","onNewIntent Activity3  taskId $taskId")
     }
 }

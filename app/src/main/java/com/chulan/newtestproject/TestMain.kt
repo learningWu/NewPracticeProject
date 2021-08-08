@@ -60,7 +60,7 @@ fun main() {
 //            charArrayOf('X', 'O', 'X', 'X'),
 //        )
 //    )
-    maxProfit(intArrayOf(8, 6, 4, 3, 2, 1))
+//    minStoneSum(intArrayOf(5, 4, 9), 2)
 }
 
 internal class Trie
@@ -1675,4 +1675,42 @@ fun maxProfitCood(prices: IntArray): Int {
 //        buy = -prices[i]
 //    }
 //    return sell
+//}
+
+fun isPrefixString(s: String, words: Array<String>): Boolean {
+    var sIndex = 0
+    for (i in words.indices) {
+        val word = words[i]
+        if (s.length - sIndex < word.length) {
+            return false
+        } else {
+            for (j in word.indices) {
+                if (s[sIndex] != word[j]) {
+                    return false
+                }
+                sIndex++
+            }
+        }
+        if (sIndex == s.length) return true
+    }
+    return false
+}
+
+//
+//fun maxProfit(prices: IntArray): Int {
+//    var firstBuy = Int.MIN_VALUE
+//    var firstSell = 0
+//    var secondBuy = Int.MIN_VALUE
+//    var secondSell = 0
+//    for (price in prices) {
+//        // 找到便宜的买了
+//        firstBuy = Math.max(firstBuy, -price)
+//        // 找到价格高的卖了
+//        firstSell = Math.max(firstSell, firstBuy + price)
+//
+//        // 第一次卖了后，现在买 firstSell - price (第一次卖赚的钱当作利润)
+//        secondBuy = Math.max(secondBuy, firstSell - price)
+//        secondSell = Math.max(secondSell, secondBuy + price)
+//    }
+//    return secondSell
 //}
