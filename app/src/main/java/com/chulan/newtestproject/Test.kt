@@ -12,15 +12,21 @@ fun main(){
     addLinkedList(linkedList)
     linkedList.insert(3,"搞笑")
     println(linkedList)
+    linkedList.search("搞笑")?.apply {
+        println(this.value)
+    }
+    linkedList.search("不搞笑")?.apply {
+        println(this.value)
+    }
 }
 
 
 fun addLinkedList(linkedList: SelfLinkedList<String>) {
-    linkedList.put("啊")
-    linkedList.put("哦")
-    linkedList.put("饿")
-    linkedList.put("已")
-    linkedList.put("无")
-    linkedList.put("与")
+    linkedList.add("啊")
+    linkedList.add("哦")
+    linkedList.add("饿")
+    linkedList.add("已")
+    linkedList.add("无")
+    linkedList.add("与")
     println(linkedList.toString())
 }
